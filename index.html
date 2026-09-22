@@ -488,7 +488,7 @@ button{font-family:var(--serif);cursor:pointer;border:none;outline:none;}
 <body>
 <div id="table-bg"></div>
 <!-- 常驻版本角标：任何时候都能一眼看出这个页面跑的是哪版代码（两个窗口必须一致） -->
-<div id="ver-tag" style="position:fixed;left:8px;bottom:6px;z-index:9998;font-size:11px;letter-spacing:1px;color:#e8c877;opacity:.6;pointer-events:none;user-select:none;text-shadow:0 1px 2px #000;"></div>
+<div id="ver-tag" title="点此强制刷新到最新版" onclick="try{VerWatch.manual();}catch(e){location.reload();}" style="position:fixed;left:8px;bottom:6px;z-index:9998;font-size:11px;letter-spacing:1px;color:#e8c877;opacity:.6;pointer-events:auto;cursor:pointer;user-select:none;text-shadow:0 1px 2px #000;"></div>
 <button id="sfx-hint" class="hidden" onclick="SFX.pulse(true);SFX.hideHint();">🔊 点这里开启音效</button>
 
 <!-- ===== 资源加载界面：只等头像（秒级）；音效进游戏后后台预热，不挡人 ===== -->
@@ -788,13 +788,60 @@ const GAME_VERSION='1.0.5';
    排查联机问题时，两个窗口必须显示同样的号；任何一个没号 / 号不一样 = 那一页是旧 JS，
    按 Ctrl+Shift+R 强刷即可（Chrome 会话恢复会直接用内存里的旧页面，普通刷新不一定生效）。 */
 (function(){
-  var txt='三国杀联机版 v'+GAME_VERSION;
+  var openAt=new Date();
+  var txt='三国杀联机版 v'+GAME_VERSION+' · '+('0'+openAt.getHours()).slice(-2)+':'+('0'+openAt.getMinutes()).slice(-2)+'打开';
   function set(id,s){try{var e=document.getElementById(id);if(e)e.textContent=s;}catch(err){}}
-  set('boot-ver',txt);
-  set('ver-tag',txt);
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',function(){set('boot-ver',txt);set('ver-tag',txt);});
+  function paint(){set('boot-ver',txt);set('ver-tag',txt);}
+  paint();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',paint);
+
+  /* 【旧页面自愈】这个页面会定时问服务器「现在最新是几版」。
+     只要自己和服务器不一致，就弹一个盖住全屏的提示并强制刷新 ——
+     不再依赖人手动按 Ctrl+R / Ctrl+Shift+R（Chrome 会话恢复时那两招经常不生效）。
+     版本号来自 /__version.json（no-store，绝不缓存），内容由服务器现读 index.html 提取。 */
+  var CHECK_MS=15000, warned=false, reloading=false;
+  function reload(){
+    if(reloading)return;reloading=true;
+    try{var u=location.href.split('#')[0].split('?')[0];location.replace(u+'?_v='+Date.now());}
+    catch(e){try{location.reload();}catch(e2){}}
   }
+  function banner(nv){
+    if(warned)return;warned=true;
+    var d=document.createElement('div');
+    d.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;font-family:inherit;';
+    d.innerHTML='<div style="font-size:22px;font-weight:700;color:#ffdf8a;margin-bottom:12px;">⚠️ 这个页面是旧版</div>'
+      +'<div style="font-size:14px;line-height:1.9;color:#f0e4c8;">本页：v'+GAME_VERSION+'<br>服务器最新：v'+nv
+      +'<br><span style="color:#ffb4b4;">旧页面会导致：看不到选将弹窗 / 出不了牌 / 人死了不显示</span></div>'
+      +'<div id="ver-stale-cd" style="margin:16px 0 14px;font-size:13px;color:#cbbb95;">3 秒后自动刷新…</div>'
+      +'<button id="ver-stale-btn" style="padding:10px 26px;font-size:15px;border-radius:8px;border:0;background:#e0b551;color:#3a2a08;font-weight:700;cursor:pointer;">立即刷新（推荐）</button>';
+    try{document.body.appendChild(d);}catch(e){reload();return;}
+    var left=3;
+    var t=setInterval(function(){
+      left--;
+      var c=document.getElementById('ver-stale-cd');
+      if(c)c.textContent=left>0?(left+' 秒后自动刷新…'):'正在刷新…';
+      if(left<=0){clearInterval(t);reload();}
+    },1000);
+    var b=document.getElementById('ver-stale-btn');
+    if(b)b.onclick=function(){clearInterval(t);reload();};
+  }
+  function check(){
+    if(reloading||warned)return;
+    if(!window.fetch)return;
+    if(String(location.protocol)==='file:')return;   /* 本地直接双击打开的文件没有服务器可问 */
+    fetch('/__version.json?t='+Date.now(),{cache:'no-store',headers:{'Cache-Control':'no-cache'}})
+      .then(function(r){return r.json();})
+      .then(function(j){
+        if(j&&j.ver&&j.ver!=='unknown'&&j.ver!==GAME_VERSION)banner(j.ver);
+      }).catch(function(){});
+  }
+  setTimeout(check,3000);          /* 页面打开 3 秒后先查一次 */
+  setInterval(check,CHECK_MS);     /* 之后每 15 秒查一次 */
+  try{
+    document.addEventListener('visibilitychange',function(){if(!document.hidden)check();});
+    window.addEventListener('focus',check);
+  }catch(e){}
+  window.VerWatch={manual:reload,check:check};
 })();
 
 /* ==================== 武将数据库 ==================== */

@@ -31,20 +31,61 @@ const MIME = {
    现在改为：素材（assets/ 下）永久缓存（immutable），文本资源 gzip 压缩。
    朋友第二次打开基本零下载，加载页秒过。 */
 const zlib = require('zlib');
+/* 版本探针缓存：以 index.html 的修改时间为键，避免每次请求都读 280KB */
+let VER_CACHE = { mtime: 0, ver: 'unknown' };
 const server = http.createServer((req, res) => {
   let p = decodeURIComponent(req.url.split('?')[0]);
   if (p === '/') p = '/index.html';
   const file = path.normalize(path.join(ROOT, p));
   if (!file.startsWith(ROOT)) { res.writeHead(403); return res.end(); }
+  /* 【版本探针】客户端定时拉这个接口，用来判断「我自己是不是旧页面」。
+     版本号是现从 index.html 里正则提取的，永远不会和真实代码脱节。
+     必须 no-store —— 只要被缓存一秒，旧页面就永远查不到新版本，自愈机制就废了。 */
+  if (p === '/__version.json') {
+    let ver = 'unknown';
+    try {
+      const mt = fs.statSync(path.join(ROOT, 'index.html')).mtimeMs;
+      if (VER_CACHE.mtime !== mt) {
+        const src = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+        const m = src.match(/GAME_VERSION\s*=\s*'([^']+)'/);
+        VER_CACHE = { mtime: mt, ver: m ? m[1] : 'unknown' };
+      }
+      ver = VER_CACHE.ver;
+    } catch (e) { }
+    res.writeHead(200, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+      'Pragma': 'no-cache', 'Expires': '0'
+    });
+    return res.end(JSON.stringify({ ver: ver, ts: Date.now() }));
+  }
   fs.readFile(file, (err, data) => {
     if (err) { res.writeHead(404); return res.end('404 Not Found'); }
     const ext = path.extname(file).toLowerCase();
     const type = MIME[ext] || 'application/octet-stream';
     /* assets/ 里的音效/图片内容基本不变：允许浏览器缓存一年（immutable）。
-       index.html 等代码仍然 no-cache，保证改动立刻生效。 */
+       index.html / js 一律 no-store（比 no-cache 更狠：连本地副本都不许留），
+       因为「某个标签页跑着旧 JS」是联机故障的第一大来源。 */
+    const isAsset = p.indexOf('/assets/') === 0;
     const headers = {
       'Content-Type': type,
-      'Cache-Control': p.indexOf('/assets/') === 0 ? 'public, max-age=31536000, immutable' : 'no-cache'
+      'Cache-Control': isAsset ? 'public, max-age=31536000, immutable'
+        : 'no-store, no-cache, must-revalidate, max-age=0',
+      'Pragma': isAsset ? '' : 'no-cache',
+      'Expires': isAsset ? '' : '0',
+      /* 变更标记：客户端拿它和自己的 GAME_VERSION 比，不一致就是旧页面 */
+      'X-Game-Version': isAsset ? '' : (
+        (function () {
+          try {
+            const mt = fs.statSync(path.join(ROOT, 'index.html')).mtimeMs;
+            if (VER_CACHE.mtime !== mt) {
+              const m = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8').match(/GAME_VERSION\s*=\s*'([^']+)'/);
+              VER_CACHE = { mtime: mt, ver: m ? m[1] : 'unknown' };
+            }
+          } catch (e) { }
+          return VER_CACHE.ver;
+        })()
+      )
     };
     const gz = /^(text\/|application\/json|image\/svg)/.test(type)
       && /\bgzip\b/.test(String(req.headers['accept-encoding'] || ''));
