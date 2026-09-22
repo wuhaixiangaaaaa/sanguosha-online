@@ -481,14 +481,14 @@ button{font-family:var(--serif);cursor:pointer;border:none;outline:none;}
 <div id="table-bg"></div>
 <button id="sfx-hint" class="hidden" onclick="SFX.pulse(true);SFX.hideHint();">🔊 点这里开启音效</button>
 
-<!-- ===== 资源加载界面：音效 / 头像全部就绪后才放行，避免好友进场后听不到音效 ===== -->
+<!-- ===== 资源加载界面：只等头像（秒级）；音效进游戏后后台预热，不挡人 ===== -->
 <div id="boot">
   <div class="boot-card">
     <div class="boot-title">三 国 杀</div>
-    <div class="boot-sub">正在加载音效与武将头像…</div>
+    <div class="boot-sub">正在加载武将头像…</div>
     <div class="boot-bar"><i id="boot-fill"></i></div>
     <div class="boot-info" id="boot-info">准备中…</div>
-    <div class="boot-hint">首次进入需要下载音效资源<br>全部就绪后会立刻进入游戏</div>
+    <div class="boot-hint">头像就绪后立即进入游戏<br>音效将在进入后后台加载，不影响开局</div>
     <button class="btn ghost small hidden" id="boot-skip" onclick="Loader.skip()">加载太慢？点此直接进入</button>
   </div>
 </div>
@@ -636,92 +636,92 @@ button{font-family:var(--serif);cursor:pointer;border:none;outline:none;}
 <!-- Toast -->
 <div id="toast"></div>
 <!-- 音频资源（静态 src，发布链路可扫描） -->
-<audio id="bgm" src="assets/audio/bgm.mp3" loop preload="auto"></audio>
-<audio id="sfx-sha" src="assets/audio/sfx-sha.mp3" preload="auto"></audio>
-<audio id="sfx-shan" src="assets/audio/sfx-shan.mp3" preload="auto"></audio>
-<audio id="sfx-cw-sha" src="assets/audio/sfx-cw-sha.mp3" preload="auto"></audio>
-<audio id="sfx-cw-shan" src="assets/audio/sfx-cw-shan.mp3" preload="auto"></audio>
+<audio id="bgm" src="assets/audio/bgm.mp3" loop preload="none"></audio>
+<audio id="sfx-sha" src="assets/audio/sfx-sha.mp3" preload="none"></audio>
+<audio id="sfx-shan" src="assets/audio/sfx-shan.mp3" preload="none"></audio>
+<audio id="sfx-cw-sha" src="assets/audio/sfx-cw-sha.mp3" preload="none"></audio>
+<audio id="sfx-cw-shan" src="assets/audio/sfx-cw-shan.mp3" preload="none"></audio>
 <!-- 卡牌音效 -->
-<audio id="sfx-tao" src="assets/audio/sfx-tao.mp3" preload="auto"></audio>
-<audio id="sfx-jiu" src="assets/audio/sfx-jiu.mp3" preload="auto"></audio>
-<audio id="sfx-wuzhong" src="assets/audio/sfx-wuzhong.mp3" preload="auto"></audio>
-<audio id="sfx-guohe" src="assets/audio/sfx-guohe.mp3" preload="auto"></audio>
-<audio id="sfx-shunshou" src="assets/audio/sfx-shunshou.mp3" preload="auto"></audio>
-<audio id="sfx-juedou" src="assets/audio/sfx-juedou.mp3" preload="auto"></audio>
-<audio id="sfx-nanman" src="assets/audio/sfx-nanman.mp3" preload="auto"></audio>
-<audio id="sfx-wanjian" src="assets/audio/sfx-wanjian.mp3" preload="auto"></audio>
-<audio id="sfx-lebu" src="assets/audio/sfx-lebu.mp3" preload="auto"></audio>
-<audio id="sfx-bingliang" src="assets/audio/sfx-bingliang.mp3" preload="auto"></audio>
-<audio id="sfx-wuxie" src="assets/audio/sfx-wuxie.mp3" preload="auto"></audio>
-<audio id="sfx-hurt" src="assets/audio/sfx-hurt.mp3" preload="auto"></audio>
+<audio id="sfx-tao" src="assets/audio/sfx-tao.mp3" preload="none"></audio>
+<audio id="sfx-jiu" src="assets/audio/sfx-jiu.mp3" preload="none"></audio>
+<audio id="sfx-wuzhong" src="assets/audio/sfx-wuzhong.mp3" preload="none"></audio>
+<audio id="sfx-guohe" src="assets/audio/sfx-guohe.mp3" preload="none"></audio>
+<audio id="sfx-shunshou" src="assets/audio/sfx-shunshou.mp3" preload="none"></audio>
+<audio id="sfx-juedou" src="assets/audio/sfx-juedou.mp3" preload="none"></audio>
+<audio id="sfx-nanman" src="assets/audio/sfx-nanman.mp3" preload="none"></audio>
+<audio id="sfx-wanjian" src="assets/audio/sfx-wanjian.mp3" preload="none"></audio>
+<audio id="sfx-lebu" src="assets/audio/sfx-lebu.mp3" preload="none"></audio>
+<audio id="sfx-bingliang" src="assets/audio/sfx-bingliang.mp3" preload="none"></audio>
+<audio id="sfx-wuxie" src="assets/audio/sfx-wuxie.mp3" preload="none"></audio>
+<audio id="sfx-hurt" src="assets/audio/sfx-hurt.mp3" preload="none"></audio>
 <!-- 装备音效 -->
-<audio id="sfx-zl_nu" src="assets/audio/sfx-zl_nu.mp3" preload="auto"></audio>
-<audio id="sfx-qinggang" src="assets/audio/sfx-qinggang.mp3" preload="auto"></audio>
-<audio id="sfx-hanbing" src="assets/audio/sfx-hanbing.mp3" preload="auto"></audio>
-<audio id="sfx-bagua" src="assets/audio/sfx-bagua.mp3" preload="auto"></audio>
-<audio id="sfx-horse_def" src="assets/audio/sfx-horse_def.mp3" preload="auto"></audio>
-<audio id="sfx-horse_atk" src="assets/audio/sfx-horse_atk.mp3" preload="auto"></audio>
+<audio id="sfx-zl_nu" src="assets/audio/sfx-zl_nu.mp3" preload="none"></audio>
+<audio id="sfx-qinggang" src="assets/audio/sfx-qinggang.mp3" preload="none"></audio>
+<audio id="sfx-hanbing" src="assets/audio/sfx-hanbing.mp3" preload="none"></audio>
+<audio id="sfx-bagua" src="assets/audio/sfx-bagua.mp3" preload="none"></audio>
+<audio id="sfx-horse_def" src="assets/audio/sfx-horse_def.mp3" preload="none"></audio>
+<audio id="sfx-horse_atk" src="assets/audio/sfx-horse_atk.mp3" preload="none"></audio>
 <!-- 技能音效 -->
-<audio id="sfx-sk_rende" src="assets/audio/sfx-sk_rende.mp3" preload="auto"></audio>
-<audio id="sfx-sk_wusheng" src="assets/audio/sfx-sk_wusheng.mp3" preload="auto"></audio>
-<audio id="sfx-sk_paoxiao" src="assets/audio/sfx-sk_paoxiao.mp3" preload="auto"></audio>
-<audio id="sfx-sk_longdan" src="assets/audio/sfx-sk_longdan.mp3" preload="auto"></audio>
-<audio id="sfx-sk_guanxing" src="assets/audio/sfx-sk_guanxing.mp3" preload="auto"></audio>
-<audio id="sfx-sk_jianxiong" src="assets/audio/sfx-sk_jianxiong.mp3" preload="auto"></audio>
-<audio id="sfx-sk_guicai" src="assets/audio/sfx-sk_guicai.mp3" preload="auto"></audio>
-<audio id="sfx-sk_ganglie" src="assets/audio/sfx-sk_ganglie.mp3" preload="auto"></audio>
-<audio id="sfx-sk_zhiheng" src="assets/audio/sfx-sk_zhiheng.mp3" preload="auto"></audio>
-<audio id="sfx-sk_yiji" src="assets/audio/sfx-sk_yiji.mp3" preload="auto"></audio>
-<audio id="sfx-sk_jjm" src="assets/audio/sfx-sk_jjm.mp3" preload="auto"></audio>
-<audio id="sfx-sk_wqdd" src="assets/audio/sfx-sk_wqdd.mp3" preload="auto"></audio>
-<audio id="sfx-sk_jbrm" src="assets/audio/sfx-sk_jbrm.mp3" preload="auto"></audio>
-<audio id="sfx-sk_pycg" src="assets/audio/sfx-sk_pycg.mp3" preload="auto"></audio>
-<audio id="sfx-sk_hjlb" src="assets/audio/sfx-sk_hjlb.mp3" preload="auto"></audio>
-<audio id="sfx-sk_jdqs" src="assets/audio/sfx-sk_jdqs.mp3" preload="auto"></audio>
-<audio id="sfx-sk_sefs" src="assets/audio/sfx-sk_sefs.mp3" preload="auto"></audio>
-<audio id="sfx-sk_dyzt" src="assets/audio/sfx-sk_dyzt.mp3" preload="auto"></audio>
-<audio id="sfx-sk_sxcm" src="assets/audio/sfx-sk_sxcm.mp3" preload="auto"></audio>
+<audio id="sfx-sk_rende" src="assets/audio/sfx-sk_rende.mp3" preload="none"></audio>
+<audio id="sfx-sk_wusheng" src="assets/audio/sfx-sk_wusheng.mp3" preload="none"></audio>
+<audio id="sfx-sk_paoxiao" src="assets/audio/sfx-sk_paoxiao.mp3" preload="none"></audio>
+<audio id="sfx-sk_longdan" src="assets/audio/sfx-sk_longdan.mp3" preload="none"></audio>
+<audio id="sfx-sk_guanxing" src="assets/audio/sfx-sk_guanxing.mp3" preload="none"></audio>
+<audio id="sfx-sk_jianxiong" src="assets/audio/sfx-sk_jianxiong.mp3" preload="none"></audio>
+<audio id="sfx-sk_guicai" src="assets/audio/sfx-sk_guicai.mp3" preload="none"></audio>
+<audio id="sfx-sk_ganglie" src="assets/audio/sfx-sk_ganglie.mp3" preload="none"></audio>
+<audio id="sfx-sk_zhiheng" src="assets/audio/sfx-sk_zhiheng.mp3" preload="none"></audio>
+<audio id="sfx-sk_yiji" src="assets/audio/sfx-sk_yiji.mp3" preload="none"></audio>
+<audio id="sfx-sk_jjm" src="assets/audio/sfx-sk_jjm.mp3" preload="none"></audio>
+<audio id="sfx-sk_wqdd" src="assets/audio/sfx-sk_wqdd.mp3" preload="none"></audio>
+<audio id="sfx-sk_jbrm" src="assets/audio/sfx-sk_jbrm.mp3" preload="none"></audio>
+<audio id="sfx-sk_pycg" src="assets/audio/sfx-sk_pycg.mp3" preload="none"></audio>
+<audio id="sfx-sk_hjlb" src="assets/audio/sfx-sk_hjlb.mp3" preload="none"></audio>
+<audio id="sfx-sk_jdqs" src="assets/audio/sfx-sk_jdqs.mp3" preload="none"></audio>
+<audio id="sfx-sk_sefs" src="assets/audio/sfx-sk_sefs.mp3" preload="none"></audio>
+<audio id="sfx-sk_dyzt" src="assets/audio/sfx-sk_dyzt.mp3" preload="none"></audio>
+<audio id="sfx-sk_sxcm" src="assets/audio/sfx-sk_sxcm.mp3" preload="none"></audio>
 <!-- 杨浩展：公演三形态 + 禁桃 -->
-<audio id="sfx-sk_gy_vocal" src="assets/audio/sfx-sk_gy_vocal.mp3" preload="auto"></audio>
-<audio id="sfx-sk_gy_rap" src="assets/audio/sfx-sk_gy_rap.mp3" preload="auto"></audio>
-<audio id="sfx-sk_gy_dance" src="assets/audio/sfx-sk_gy_dance.mp3" preload="auto"></audio>
-<audio id="sfx-sk_jt" src="assets/audio/sfx-sk_jt.mp3" preload="auto"></audio>
+<audio id="sfx-sk_gy_vocal" src="assets/audio/sfx-sk_gy_vocal.mp3" preload="none"></audio>
+<audio id="sfx-sk_gy_rap" src="assets/audio/sfx-sk_gy_rap.mp3" preload="none"></audio>
+<audio id="sfx-sk_gy_dance" src="assets/audio/sfx-sk_gy_dance.mp3" preload="none"></audio>
+<audio id="sfx-sk_jt" src="assets/audio/sfx-sk_jt.mp3" preload="none"></audio>
 <!-- 女性角色卡牌语音（赵延莲 / 蔡巍 等女角色自动使用） -->
-<audio id="sfx-f-sha" src="assets/audio/sfx-f-sha.mp3" preload="auto"></audio>
-<audio id="sfx-f-shan" src="assets/audio/sfx-f-shan.mp3" preload="auto"></audio>
-<audio id="sfx-f-tao" src="assets/audio/sfx-f-tao.mp3" preload="auto"></audio>
-<audio id="sfx-f-jiu" src="assets/audio/sfx-f-jiu.mp3" preload="auto"></audio>
-<audio id="sfx-f-wuzhong" src="assets/audio/sfx-f-wuzhong.mp3" preload="auto"></audio>
-<audio id="sfx-f-guohe" src="assets/audio/sfx-f-guohe.mp3" preload="auto"></audio>
-<audio id="sfx-f-shunshou" src="assets/audio/sfx-f-shunshou.mp3" preload="auto"></audio>
-<audio id="sfx-f-juedou" src="assets/audio/sfx-f-juedou.mp3" preload="auto"></audio>
-<audio id="sfx-f-nanman" src="assets/audio/sfx-f-nanman.mp3" preload="auto"></audio>
-<audio id="sfx-f-wanjian" src="assets/audio/sfx-f-wanjian.mp3" preload="auto"></audio>
-<audio id="sfx-f-lebu" src="assets/audio/sfx-f-lebu.mp3" preload="auto"></audio>
-<audio id="sfx-f-bingliang" src="assets/audio/sfx-f-bingliang.mp3" preload="auto"></audio>
-<audio id="sfx-f-wuxie" src="assets/audio/sfx-f-wuxie.mp3" preload="auto"></audio>
-<audio id="sfx-f-zl_nu" src="assets/audio/sfx-f-zl_nu.mp3" preload="auto"></audio>
-<audio id="sfx-f-qinggang" src="assets/audio/sfx-f-qinggang.mp3" preload="auto"></audio>
-<audio id="sfx-f-hanbing" src="assets/audio/sfx-f-hanbing.mp3" preload="auto"></audio>
-<audio id="sfx-f-bagua" src="assets/audio/sfx-f-bagua.mp3" preload="auto"></audio>
-<audio id="sfx-f-horse_atk" src="assets/audio/sfx-f-horse_atk.mp3" preload="auto"></audio>
-<audio id="sfx-f-horse_def" src="assets/audio/sfx-f-horse_def.mp3" preload="auto"></audio>
-<audio id="sfx-f-hurt" src="assets/audio/sfx-f-hurt.mp3" preload="auto"></audio>
+<audio id="sfx-f-sha" src="assets/audio/sfx-f-sha.mp3" preload="none"></audio>
+<audio id="sfx-f-shan" src="assets/audio/sfx-f-shan.mp3" preload="none"></audio>
+<audio id="sfx-f-tao" src="assets/audio/sfx-f-tao.mp3" preload="none"></audio>
+<audio id="sfx-f-jiu" src="assets/audio/sfx-f-jiu.mp3" preload="none"></audio>
+<audio id="sfx-f-wuzhong" src="assets/audio/sfx-f-wuzhong.mp3" preload="none"></audio>
+<audio id="sfx-f-guohe" src="assets/audio/sfx-f-guohe.mp3" preload="none"></audio>
+<audio id="sfx-f-shunshou" src="assets/audio/sfx-f-shunshou.mp3" preload="none"></audio>
+<audio id="sfx-f-juedou" src="assets/audio/sfx-f-juedou.mp3" preload="none"></audio>
+<audio id="sfx-f-nanman" src="assets/audio/sfx-f-nanman.mp3" preload="none"></audio>
+<audio id="sfx-f-wanjian" src="assets/audio/sfx-f-wanjian.mp3" preload="none"></audio>
+<audio id="sfx-f-lebu" src="assets/audio/sfx-f-lebu.mp3" preload="none"></audio>
+<audio id="sfx-f-bingliang" src="assets/audio/sfx-f-bingliang.mp3" preload="none"></audio>
+<audio id="sfx-f-wuxie" src="assets/audio/sfx-f-wuxie.mp3" preload="none"></audio>
+<audio id="sfx-f-zl_nu" src="assets/audio/sfx-f-zl_nu.mp3" preload="none"></audio>
+<audio id="sfx-f-qinggang" src="assets/audio/sfx-f-qinggang.mp3" preload="none"></audio>
+<audio id="sfx-f-hanbing" src="assets/audio/sfx-f-hanbing.mp3" preload="none"></audio>
+<audio id="sfx-f-bagua" src="assets/audio/sfx-f-bagua.mp3" preload="none"></audio>
+<audio id="sfx-f-horse_atk" src="assets/audio/sfx-f-horse_atk.mp3" preload="none"></audio>
+<audio id="sfx-f-horse_def" src="assets/audio/sfx-f-horse_def.mp3" preload="none"></audio>
+<audio id="sfx-f-hurt" src="assets/audio/sfx-f-hurt.mp3" preload="none"></audio>
 <!-- 回合播报：到XX出牌了（女角色用女声） -->
-<audio id="sfx-turn-liubei" src="assets/audio/sfx-turn-liubei.mp3" preload="auto"></audio>
-<audio id="sfx-turn-guanyu" src="assets/audio/sfx-turn-guanyu.mp3" preload="auto"></audio>
-<audio id="sfx-turn-zhangfei" src="assets/audio/sfx-turn-zhangfei.mp3" preload="auto"></audio>
-<audio id="sfx-turn-zhugeliang" src="assets/audio/sfx-turn-zhugeliang.mp3" preload="auto"></audio>
-<audio id="sfx-turn-zhaoyun" src="assets/audio/sfx-turn-zhaoyun.mp3" preload="auto"></audio>
-<audio id="sfx-turn-caocao" src="assets/audio/sfx-turn-caocao.mp3" preload="auto"></audio>
-<audio id="sfx-turn-simayi" src="assets/audio/sfx-turn-simayi.mp3" preload="auto"></audio>
-<audio id="sfx-turn-xiahoudun" src="assets/audio/sfx-turn-xiahoudun.mp3" preload="auto"></audio>
-<audio id="sfx-turn-guojia" src="assets/audio/sfx-turn-guojia.mp3" preload="auto"></audio>
-<audio id="sfx-turn-sunquan" src="assets/audio/sfx-turn-sunquan.mp3" preload="auto"></audio>
-<audio id="sfx-turn-caiwei" src="assets/audio/sfx-turn-caiwei.mp3" preload="auto"></audio>
-<audio id="sfx-turn-wuhaixiang" src="assets/audio/sfx-turn-wuhaixiang.mp3" preload="auto"></audio>
-<audio id="sfx-turn-whx_kg" src="assets/audio/sfx-turn-whx_kg.mp3" preload="auto"></audio>
-<audio id="sfx-turn-zhaoyanlian" src="assets/audio/sfx-turn-zhaoyanlian.mp3" preload="auto"></audio>
+<audio id="sfx-turn-liubei" src="assets/audio/sfx-turn-liubei.mp3" preload="none"></audio>
+<audio id="sfx-turn-guanyu" src="assets/audio/sfx-turn-guanyu.mp3" preload="none"></audio>
+<audio id="sfx-turn-zhangfei" src="assets/audio/sfx-turn-zhangfei.mp3" preload="none"></audio>
+<audio id="sfx-turn-zhugeliang" src="assets/audio/sfx-turn-zhugeliang.mp3" preload="none"></audio>
+<audio id="sfx-turn-zhaoyun" src="assets/audio/sfx-turn-zhaoyun.mp3" preload="none"></audio>
+<audio id="sfx-turn-caocao" src="assets/audio/sfx-turn-caocao.mp3" preload="none"></audio>
+<audio id="sfx-turn-simayi" src="assets/audio/sfx-turn-simayi.mp3" preload="none"></audio>
+<audio id="sfx-turn-xiahoudun" src="assets/audio/sfx-turn-xiahoudun.mp3" preload="none"></audio>
+<audio id="sfx-turn-guojia" src="assets/audio/sfx-turn-guojia.mp3" preload="none"></audio>
+<audio id="sfx-turn-sunquan" src="assets/audio/sfx-turn-sunquan.mp3" preload="none"></audio>
+<audio id="sfx-turn-caiwei" src="assets/audio/sfx-turn-caiwei.mp3" preload="none"></audio>
+<audio id="sfx-turn-wuhaixiang" src="assets/audio/sfx-turn-wuhaixiang.mp3" preload="none"></audio>
+<audio id="sfx-turn-whx_kg" src="assets/audio/sfx-turn-whx_kg.mp3" preload="none"></audio>
+<audio id="sfx-turn-zhaoyanlian" src="assets/audio/sfx-turn-zhaoyanlian.mp3" preload="none"></audio>
 
 <script>
 "use strict";
@@ -1194,8 +1194,11 @@ const Loader={
   start(){
     if(this._started)return;this._started=true;
     const boot=document.getElementById('boot');if(!boot)return;
-    const els=[].slice.call(document.querySelectorAll('audio[id^="sfx-"]'))   /* 不含 bgm：它可边听边下 */
-      .concat([].slice.call(document.querySelectorAll('img[data-asset]')))
+    /* 【只等头像，不等音效】86 个音效共约 27MB，经 cpolar 免费隧道要下载好几分钟，
+       曾把好友永远挡在这张加载页后面（遮罩吃掉所有点击 → 看不到选将 / 出不了牌 /
+       超时自动选将）。音效改为：进游戏后后台逐个预热 + 播放时按需下载
+       （SFX._playLocal 对 readyState===0 的元素本来就会先 load 再播）。 */
+    const els=[].slice.call(document.querySelectorAll('img[data-asset]'))
       .filter(e=>e&&e.getAttribute('src'));
     this.total=els.length;
     if(!this.total){this.finish();return;}
@@ -1229,6 +1232,20 @@ const Loader={
         if(b){b.classList.add('done');setTimeout(()=>{try{b.remove();}catch(e){}},200);}}catch(e){}
     },20000);
   },
+  /* 放行后后台逐个预热音效：一次只下 1 个（每 0.4s 一个），不抢游戏消息的带宽。
+     下过的进浏览器缓存（配合服务器 immutable 缓存，第二次打开零下载）。 */
+  warm(){
+    if(this._warming)return;this._warming=true;
+    const list=[].slice.call(document.querySelectorAll('audio[id^="sfx-"]'));
+    let i=0;
+    const next=()=>{
+      if(i>=list.length){this._warming=false;return;}
+      const a=list[i++];
+      try{if(a.preload!=='auto'){a.preload='auto';a.load();}}catch(e){}
+      setTimeout(next,400);
+    };
+    next();
+  },
   paint(){
     if(this.finished)return;
     const pct=this.total?Math.min(100,Math.round(this.done/this.total*100)):100;
@@ -1250,6 +1267,8 @@ const Loader={
     setTimeout(()=>{try{if(b.remove)b.remove();}catch(e){}},320);
     /* 放行后若音频仍未解锁，亮出常驻开启按钮 */
     setTimeout(()=>{try{if(!SFX._unlocked)SFX.showHint();}catch(e){}},500);
+    /* 进入后台预热音效：不阻塞进入，音效在开局前后台陆续就绪 */
+    setTimeout(()=>{try{this.warm();}catch(e){}},1500);
   },
   enter(){this.finish();}
 };

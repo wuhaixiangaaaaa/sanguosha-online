@@ -22,7 +22,15 @@ const MIME = {
   '.woff': 'font/woff', '.woff2': 'font/woff2', '.ico': 'image/x-icon'
 };
 
-/* ---------------- 静态文件 ---------------- */
+/* ---------------- 静态文件 ----------------
+   【性能关键】以前对全站一律 no-cache 且不支持 gzip / 304：
+   · index.html 232KB 每次全量下发；
+   · 更致命的是 27MB 音效素材每次打开页面都要经 cpolar 免费隧道重新下载一遍
+     （两人同时进 = 54MB 抢一条免费隧道），把加载页卡住、把游戏消息全部挤在后面 ——
+     表现就是「一直卡在准备中 / 看不到选将 / 出不了牌 / 人死了对面看不到」。
+   现在改为：素材（assets/ 下）永久缓存（immutable），文本资源 gzip 压缩。
+   朋友第二次打开基本零下载，加载页秒过。 */
+const zlib = require('zlib');
 const server = http.createServer((req, res) => {
   let p = decodeURIComponent(req.url.split('?')[0]);
   if (p === '/') p = '/index.html';
@@ -30,11 +38,27 @@ const server = http.createServer((req, res) => {
   if (!file.startsWith(ROOT)) { res.writeHead(403); return res.end(); }
   fs.readFile(file, (err, data) => {
     if (err) { res.writeHead(404); return res.end('404 Not Found'); }
-    res.writeHead(200, {
-      'Content-Type': MIME[path.extname(file).toLowerCase()] || 'application/octet-stream',
-      'Cache-Control': 'no-cache'
-    });
-    res.end(data);
+    const ext = path.extname(file).toLowerCase();
+    const type = MIME[ext] || 'application/octet-stream';
+    /* assets/ 里的音效/图片内容基本不变：允许浏览器缓存一年（immutable）。
+       index.html 等代码仍然 no-cache，保证改动立刻生效。 */
+    const headers = {
+      'Content-Type': type,
+      'Cache-Control': p.indexOf('/assets/') === 0 ? 'public, max-age=31536000, immutable' : 'no-cache'
+    };
+    const gz = /^(text\/|application\/json|image\/svg)/.test(type)
+      && /\bgzip\b/.test(String(req.headers['accept-encoding'] || ''));
+    if (gz) {
+      zlib.gzip(data, (e, buf) => {
+        if (e) { res.writeHead(200, headers); return res.end(data); }
+        headers['Content-Encoding'] = 'gzip';
+        res.writeHead(200, headers);
+        res.end(buf);
+      });
+    } else {
+      res.writeHead(200, headers);
+      res.end(data);
+    }
   });
 });
 
