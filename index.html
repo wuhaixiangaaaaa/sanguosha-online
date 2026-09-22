@@ -346,6 +346,14 @@ button{font-family:var(--serif);cursor:pointer;border:none;outline:none;}
   opacity:0;transition:opacity .25s,transform .25s;max-width:88vw;text-align:center;}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(6px);}
 
+/* 联机等待横幅：该谁操作 + 倒计时 */
+#wait-banner{position:fixed;left:50%;top:26%;transform:translateX(-50%);z-index:98;pointer-events:none;
+  background:rgba(28,17,8,.93);border:1px solid rgba(201,163,92,.6);color:var(--gold-bright);
+  padding:10px 24px;border-radius:8px;font-size:15px;letter-spacing:1px;box-shadow:0 4px 18px rgba(0,0,0,.5);
+  max-width:88vw;text-align:center;}
+#wait-banner.hidden{display:none;}
+#wait-banner b{color:#ffd98a;}
+
 /* ==================== 图鉴 ==================== */
 #view-codex{z-index:1;background:linear-gradient(180deg,#1c1108,#120a05);display:flex;flex-direction:column;}
 .codex-tabs{display:flex;gap:6px;padding:12px 16px 0;flex-wrap:wrap;}
@@ -2095,8 +2103,10 @@ async function playFromHand(p,card,virtualName,target){
     else if(name==='乐不思蜀'||name==='兵粮寸断'){
       const i=p.hand.findIndex(c=>c.uid===card.uid);if(i>=0)p.hand.splice(i,1);
       target.judges.push(card);
-      if(await resolveWuxie(p,target,card,true)){/* 延时锦囊被无懈 */toDiscard(card);}
-      else{log(`${nameHTML(p)} 将${cardHTML(card)}置于 ${nameHTML(target)} 判定区`);floatWord(card.name,'info');}
+      /* 延时锦囊出牌时不问无懈：等目标的判定阶段、这张牌即将生效时再问
+         （judgePhase 已实现「判定前无懈询问」）。以前刚贴牌就问一轮，
+         到真正判定时反而没有无懈机会 —— 时机不对。 */
+      log(`${nameHTML(p)} 将${cardHTML(card)}置于 ${nameHTML(target)} 判定区`);floatWord(card.name,'info');
     }
   }finally{
     if(fxArrow)FX.fadeArrow(fxArrow);
@@ -4006,7 +4016,7 @@ document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
 /* ==================== 联机模块（房主权威 + WebSocket 中转） ==================== */
 const NET={
   ws:null, clientMode:false, hostActive:false, inLobby:false, inGame:false,
-  mySeat:-1, roomCode:null, isHost:false, lobby:[], remotes:[],
+  mySeat:-1, roomCode:null, isHost:false, lobby:[], remotes:[], myName:'', _reconnecting:false, _lastRoom:null,
   currentAsk:null, pending:{}, pendingSeat:{}, askSeq:1, lastView:{}, _lordSaved:null,
   ASK_TIMEOUT_MS:20000,   /* 等远程玩家做任何决定的上限，超时按放弃结算（防整桌死锁） */
 
@@ -4035,10 +4045,33 @@ const NET={
       if(!NET.ws||NET.ws.readyState!==1)return;
       NET.send({t:'hb'});
       if(NET._lastMsg&&Date.now()-NET._lastMsg>25000){
-        NET._lastMsg=Date.now();   /* 最多每 25s 提示一次 */
-        toast('连接似乎已断开（隧道不稳定），请刷新页面后重新加入房间');
+        NET._lastMsg=Date.now();
+        NET.reconnect();   /* 隧道「TCP 半开」不再只提示干等——主动断开重连，找回原座位 */
       }
     },8000);
+  },
+  /* 断线自愈：cpolar 免费隧道会把空闲连接掐成「半开」（readyState 还是 1 但消息全部黑洞）。
+     以前掉线只能提示「请刷新」，玩家在大厅等选将时连接恰恰是空闲的 —— 所以总是死在选将这一步。
+     现在检测到黑洞就自动重连，服务器按昵称把原座位还给玩家，房主收到 peerBack 后继续给他发询问。 */
+  async reconnect(){
+    if(NET._reconnecting)return;NET._reconnecting=true;
+    /* 房间号可能已被 onClose 的 reset 清掉：从「最后房间」记录里找回来 */
+    const code=NET.roomCode||(NET._lastRoom&&NET._lastRoom.code);
+    const name=NET.myName||(NET._lastRoom&&NET._lastRoom.name);
+    if(!code){NET._reconnecting=false;return;}
+    try{toast('连接已断开，正在自动重连……');}catch(e){}
+    try{if(NET.ws){try{NET.ws.close();}catch(e){}}}catch(e){}
+    NET.ws=null;
+    for(let i=0;i<5;i++){
+      try{
+        await NET.connect();
+        NET.send({t:'join',code,name:name||'玩家',rejoin:true});
+        NET._reconnecting=false;
+        return;
+      }catch(e){await new Promise(r=>setTimeout(r,2000));}
+    }
+    NET._reconnecting=false;
+    try{toast('自动重连失败，请刷新页面重新加入房间');}catch(e){}
   },
 
   /* ---------- 大厅 ---------- */
@@ -4060,11 +4093,13 @@ const NET={
   _name(){const n=($('#net-name').value||'').trim();if(!n){toast('请先输入昵称');return null;}localStorage.setItem('sgs_name',n);return n;},
   async doCreate(){
     const name=NET._name();if(!name)return;
+    NET.myName=name;
     try{await NET.connect();}catch(e){toast('连接服务器失败：请确认已启动 server.js');return;}
     NET.send({t:'create',name});
   },
   async doJoin(){
     const name=NET._name();if(!name)return;
+    NET.myName=name;
     const code=($('#net-code').value||'').trim();
     if(!/^\d{4}$/.test(code)){toast('请输入 4 位数字房间号');return;}
     try{await NET.connect();}catch(e){toast('连接服务器失败：请确认已启动 server.js');return;}
@@ -4100,10 +4135,13 @@ const NET={
       case 'room':
         closeModal();
         NET.roomCode=m.code;NET.mySeat=m.seat;NET.isHost=!!m.host;
+        NET._lastRoom={code:m.code,name:NET.myName||''};   /* 记住最后房间：掉线后自动重连要用 */
         NET.inLobby=true;NET.clientMode=!m.host;NET.hostActive=!!m.host;
         NET.startHeartbeat();
         if(!m.host)NET.hijack(); // 客户端：点击只转发，不本地结算
-        UI.show('lobby');break;
+        if(!NET.inGame)UI.show('lobby');   /* 断线重连时 NET.inGame 仍为 true：不闪回大厅，等下一帧状态快照直接回牌局 */
+        else toast('已重新连接，正在同步牌局……');
+        break;
       case 'lobby':
         NET.lobby=m.players;
         if(NET.isHost)NET.remotes=m.players.filter(x=>x.seat!==0).map(x=>({seat:x.seat,name:x.name}));
@@ -4114,15 +4152,21 @@ const NET={
         else{$('#lobby-status').textContent='房主已开局，正在分配武将……';}
         break;
       case 'peerLeft':NET.peerLeft(m.seat);break;
+      case 'peerBack':NET.peerBack(m.seat,m.name);break;
       case 'hostLeft':
         toast('房主已离开，房间解散');NET.reset();G.over=true;closeModal();UI.show('menu');break;
       case 'msg':NET.onGameMsg(m.from,m.data);break;
     }
   },
   onClose(){
+    if(NET._reconnecting)return;   /* 主动重连引起的 close：保留状态，由 reconnect 接管 */
     const was=NET.clientMode||NET.hostActive||NET.inLobby;
     NET.reset();
-    if(was){G.over=true;try{closeModal();}catch(e){}UI.show('menu');toast('与服务器断开连接');}
+    if(was){
+      /* 掉线不再直接踢回主菜单：有房间记录就自动重连（服务器会把原座位还给玩家） */
+      if(NET._lastRoom&&NET._lastRoom.code){toast('连接断开，正在自动重连……');NET.reconnect();}
+      else{G.over=true;try{closeModal();}catch(e){}UI.show('menu');toast('与服务器断开连接');}
+    }
   },
   onGameMsg(from,d){
     if(!d)return;
@@ -4164,11 +4208,12 @@ const NET={
       case 'judge':UI.showJudge(d.card);break;
       case 'judgeHide':UI.hideJudge();break;
       case 'toast':toast(d.msg);break;
+      case 'wait':NET.showWait(d);break;
       case 'chat':UI.chat(d.name,d.text);break;
       case 'result':NET.onResult(d);break;
       case 'abort':toast('房主结束了对局');NET.reset();G.over=true;closeModal();UI.show('menu');break;
       case 'lordOk':NET.currentAsk=null;closeModal();toast(d.msg||'有武将替你打出');break;
-      case 'askAbort':NET.currentAsk=null;closeModal();toast('已超时，视为放弃');break;
+      case 'askAbort':NET.currentAsk=null;closeModal();NET.showWait(null);toast('已超时，视为放弃');break;
       case 'lordFail':
         if(NET._lordSaved)$('#modal-box').innerHTML=NET._lordSaved;
         toast('没有武将能替你打出，请自行打出或点"放弃"');break;
@@ -4301,6 +4346,7 @@ const NET={
     if(v.youAct&&!G.helpShown){G.helpShown=true;UI.showHelp(true);}
   },
   onResult(d){
+    NET.showWait(null);
     for(const r of d.reveal){const p=P(r.seat);if(p){p.identity=r.identity;p.revealed=true;p.tag=r.tag;}}
     setTimeout(()=>{UI.showResult(d.win,d.title,d.detail);},400);
   },
@@ -4370,12 +4416,19 @@ const NET={
      以前只有出牌/响应/弃牌三类有读秒，选目标、选牌、公演三选一、选将等
      都是裸 await —— 玩家切后台/断网/不点，房主就永远卡在这一行，整桌陪葬。
      超时后按「放弃」结算（res(null)），并通知客机把弹窗关掉。 */
-  askRemote(p,fn,args,ms){
+  askRemote(p,fn,args,ms,label){
     return new Promise(res=>{
       const askId=NET.askSeq++;
       const se=NET.serArgs(fn,args);
       let settled=false;
-      const done=v=>{if(settled)return;settled=true;clearTimeout(to);res(v);};
+      const pp=(typeof P==='function')?P(p.seat):null;
+      const who=label||(pp?(pp.pname||generalOf(pp).name):('座位'+(p.seat+1)));
+      /* 等待横幅：让全桌看到轮到谁 + 倒计时（被问的人自己看到「轮到你」） */
+      const tot=Math.round((ms||NET.ASK_TIMEOUT_MS)/1000);
+      let left=tot;
+      NET.broadcast({k:'wait',seat:p.seat,name:who,left,tot});
+      const wt=setInterval(()=>{left=Math.max(0,left-0.5);if(!settled)NET.broadcast({k:'wait',seat:p.seat,name:who,left,tot});},500);
+      const done=v=>{if(settled)return;settled=true;clearTimeout(to);clearInterval(wt);NET.broadcast({k:'wait',clear:1});res(v);};
       const to=setTimeout(()=>{
         delete NET.pending[askId];
         if(NET.pendingSeat[p.seat]===askId)delete NET.pendingSeat[p.seat];
@@ -4478,7 +4531,13 @@ const NET={
       const pool=shuffle(PLAYABLE_IDS.filter(x=>!usedGids.has(x)));
       const opts=pool.map(gid=>({gid,name:GENERAL_MAP[gid].name,kingdom:GENERAL_MAP[gid].kingdom,hp:GENERAL_MAP[gid].hp,
         skills:GENERAL_MAP[gid].skills.map(s=>s.name+'：'+s.desc).join('<br>')}));
-      const gid=await NET.askRemote({seat:r.seat},'chooseGeneral',[opts],60000);  /* 选将给足 60 秒 */
+      const label=r.name||('座位'+(r.seat+1));
+      let gid=await NET.askRemote({seat:r.seat},'chooseGeneral',[opts],60000,label);  /* 选将给足 60 秒 */
+      /* 隧道黑洞兜底：第一次超时可能只是玩家掉线自动重连中——座位还在就再给 30 秒 */
+      if(!gid&&NET.remotes.some(x=>x.seat===r.seat)){
+        toast(label+' 没能完成选将（可能掉线，已自动重连），再等 30 秒……');
+        gid=await NET.askRemote({seat:r.seat},'chooseGeneral',[opts],30000,label);
+      }
       picks[r.seat]=(gid&&GENERAL_MAP[gid]&&!usedGids.has(gid))?gid:pool[0];
       usedGids.add(picks[r.seat]);
     }
@@ -4543,6 +4602,32 @@ const NET={
       UI.render();
     }
     if(NET.inLobby)NET.renderLobby();
+  },
+  /* 掉线玩家重连回来：恢复座位与「远程玩家」身份，并立刻补发一份牌局快照 */
+  peerBack(seat,name){
+    if(!NET.hostActive)return;
+    if(!NET.remotes.some(r=>r.seat===seat))NET.remotes.push({seat,name});
+    const p=P(seat);
+    if(p&&p.offline){
+      p.isAI=false;p.remote=true;p.offline=false;p.pname=name;p.tag='（'+name+'）';
+      log(`${nameHTML(p)} 重新连接，回到牌局`,true);
+    }
+    delete NET.lastView[seat];
+    NET.flushRender();
+    try{toast((name||'玩家')+' 已重新连接');}catch(e){}
+  },
+  /* 等待横幅：房主每 0.5s 广播一次「谁在被询问 + 剩余秒数」。
+     被询问的玩家看到「轮到你操作了（剩余 X 秒）」，其他人看到「正在等待 XX 操作」。 */
+  showWait(d){
+    let b=document.getElementById('wait-banner');
+    if(!d||d.clear){if(b)b.classList.add('hidden');return;}
+    if(!b){b=document.createElement('div');b.id='wait-banner';document.body.appendChild(b);}
+    const mine=!!NET.currentAsk;   /* 我正是被询问的人 */
+    const secs=Math.max(0,Math.ceil(d.left||0));
+    b.innerHTML=mine
+      ?`轮到你操作了（剩余 <b>${secs}</b> 秒）`
+      :`正在等待 <b>${d.name||'其他玩家'}</b> 操作（剩余 ${secs} 秒）`;
+    b.classList.remove('hidden');
   },
   hostAbort(){
     NET.broadcast({k:'abort'});
@@ -4653,11 +4738,13 @@ const NET={
 /* guanxing 需要把发出的牌缓存供答案映射（挂在 askRemote extra 上） */
 (function(){
   const orig=NET.askRemote;
-  NET.askRemote=function(p,fn,args){
+  /* 注意：必须透传 ms/label —— 以前这里写成 (p,fn,args) 再原样调用，
+     把调用方给的超时（如选将 60s）和等待横幅名字全部丢掉，统一退化成 20s 默认值 */
+  NET.askRemote=function(p,fn,args,ms,label){
     if(fn==='guanxingHuman'){
-      return orig.call(NET,p,fn,args).then(r=>r);
+      return orig.call(NET,p,fn,args,ms,label).then(r=>r);
     }
-    return orig.call(NET,p,fn,args);
+    return orig.call(NET,p,fn,args,ms,label);
   };
   const origSer=NET.serArgs;
   NET.serArgs=function(fn,args){

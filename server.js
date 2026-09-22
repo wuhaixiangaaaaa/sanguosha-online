@@ -139,6 +139,11 @@ function leave(client) {
     log(`房间 ${code} 已解散（房主离开）`);
   } else {
     room.members.delete(client.seat);
+    /* 已开局房间里掉线的座位先记账：玩家重连（同名）时原座位奉还 */
+    if (room.started && client.seat > 0) {
+      room.gone = room.gone || {};
+      room.gone[client.name] = client.seat;
+    }
     if (room.host) room.host.send({ t: 'peerLeft', seat: client.seat });
     broadcastLobby(room, code);
     log(`${client.name} 离开房间 ${code}（${room.members.size}/5）`);
@@ -162,6 +167,26 @@ function handleMsg(client, m) {
     case 'join': {
       const room = rooms.get(String(m.code || ''));
       if (!room) return client.send({ t: 'err', msg: '房间不存在，请检查房间号' });
+      /* 断线自动重连：房间已开局时，用原昵称找回自己的座位 */
+      if (room.started && m.rejoin) {
+        let seat = room.gone && room.gone[String(m.name || '')];
+        /* 宽容匹配：只有一个掉线空位时（最常见），不管昵称是否完全一致都归还，
+           避免玩家昵称大小写差异 / 改名导致永远连不回来 */
+        if (seat == null && room.gone) {
+          const goneSeats = Object.values(room.gone);
+          if (goneSeats.length === 1) seat = goneSeats[0];
+        }
+        if (seat == null || room.members.has(seat)) return client.send({ t: 'err', msg: '重连失败：座位已被顶替，请等待下一局' });
+        for (const k of Object.keys(room.gone)) if (room.gone[k] === seat) delete room.gone[k];
+        leave(client);
+        room.members.set(seat, client);
+        client.room = String(m.code); client.seat = seat;
+        client.name = String(m.name || '').slice(0, 12);
+        client.send({ t: 'room', code: client.room, seat, host: false });
+        if (room.host) room.host.send({ t: 'peerBack', seat, name: client.name });
+        log(`${client.name} 重连回房间 ${client.room}（座位 ${seat + 1}）`);
+        break;
+      }
       if (room.started) return client.send({ t: 'err', msg: '该房间游戏已开始，无法加入' });
       if (room.members.size >= 5) return client.send({ t: 'err', msg: '房间已满（5人）' });
       leave(client);
