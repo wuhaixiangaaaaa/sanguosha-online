@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>三国杀 · 经典复刻（单机雏形）</title>
+<title>三国杀 · 经典复刻（自制版）</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%235a1410'/%3E%3Crect x='5' y='5' width='54' height='54' rx='8' fill='none' stroke='%23d9b86a' stroke-width='2.5'/%3E%3Ctext x='32' y='45' font-size='38' text-anchor='middle' fill='%23e8c87e' font-family='serif' font-weight='bold'%3E%E6%9D%80%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="assets/fonts/fonts.css">
 <style>
@@ -817,10 +817,12 @@ const GENERALS=[
   skills:[{key:'gy',name:'公演',type:'trigger',desc:'锁定技：游戏开始时，你获得3个「麦克风」。每轮开始时，你需选择以下3个效果之一发动：『Vocal』弃置1个「麦克风」，从牌堆随机获得一张【桃】，且本轮你于回合内首次成为基本牌的目标时摸一张牌；『Rap』弃置2个「麦克风」，本轮你造成的伤害+1；『Dance』回复1点体力，随机从牌堆装备一张防具牌和防御马牌，并于本轮结束后获得随机0-2个「麦克风」。'},
           {key:'jt',name:'禁桃',type:'passive',desc:'锁定技：你的【桃】均视为【杀】，且不计入使用次数。'}]},
  {id:'zhangzheng',name:'张峥',kingdom:'qun',hp:4,img:'zhangzheng',img2:'zhangzheng_2',gender:'m',
-  skills:[{key:'shekong',name:'社恐',type:'passive',desc:'锁定技：你不能成为【决斗】的目标；且你的手牌上限+2（宅在家里囤货，弃牌阶段可按「体力+2」保留手牌）。'},
-          {key:'diqiya',name:'低气压',type:'active',desc:'出牌阶段限一次。你令一名其他角色弃置两张手牌（随机）；若其手牌不足两张，改为受到你造成的 1 点伤害。'},
-          {key:'erciyuan',name:'二次元',type:'active',desc:'出牌阶段限一次，每局限两次。你进入「二次元形态」：更换形象与语音，回复 1 点体力并摸两张牌；该形态下你使用【杀】无次数限制，持续到你的下个回合开始时结束。'},
-          {key:'shilian',name:'十连',type:'active',desc:'出牌阶段限一次。你弃置所有手牌，然后摸十张牌（十连抽卡）：其中每有 3 张【杀】，你可令一名其他角色受到 1 点伤害（至多 2 点）。'}]},
+  skills:[
+    {key:'shekong',name:'社恐',type:'passive',desc:'锁定技：游戏开始时，你获得 X÷2（向下取整）个「i人标记」（X 为游戏开始时存活角色数），至多 3 个。当你拥有「i人标记」时，你不能使用或打出牌响应其他角色使用的牌或技能，且不能使用【杀】；其他角色对你使用的、需要你响应的牌或技能，令你移去 1 个「i人标记」。你使用的、需要其他角色响应的牌或技能，若其响应，你移去 1 个「i人标记」，若其未响应，你获得 1 个「i人标记」。你的红桃基本牌可以当【桃】使用。'},
+    {key:'diqiya',name:'低气压',type:'active',desc:'出牌阶段限一次。你弃置一张手牌，然后按弃置牌的类型：『杀』获得 2 个「i人标记」；『其他基本牌』移去 1 个「i人标记」并摸一张牌；『装备牌』使用此装备牌并获得 1 个「i人标记」；『锦囊牌』移去 1 个「i人标记」并跳过本回合的弃牌阶段。'},
+    {key:'erciyuan',name:'二次元',type:'passive',desc:'锁定技：结束阶段，若你处于翻面状态或拥有的「i人标记」数大于 3，则令【社恐】失效，直到你的下个回合开始阶段；然后你可移去「i人标记」，每移去 1 个视为使用 1 张基本牌或非延时锦囊牌（杀至多 2 次，非延时锦囊牌至多 1 次）。'},
+    {key:'shilian',name:'十连',type:'limited',desc:'限定技，准备阶段：你可跳过本回合的判定阶段和摸牌阶段。若如此做，展示牌堆顶的十张牌，获得其中所有非【杀】牌；然后将展示的【杀】任意分配给其他角色，每名被分配者选择接收或不接收，若其接收你移去 1 个「i人标记」且其获得此【杀】；最后弃置所有未被接收的【杀】，每弃置 1 张你获得 1 个「i人标记」。若展示的牌中有宝物牌，你永久失去【社恐】，且准备阶段结束时获得 2 个「i人标记」。'}
+  ]},
  {id:'zhangrong',name:'张嵘',kingdom:'wu',hp:5,img:'zhangrong',img2:'zhangrong_2',gender:'m',
   skills:[{key:'tiangou',name:'舔狗',type:'active',desc:'出牌阶段限一次。你弃置一张手牌并选择一名其他角色：你摸一张牌，然后该角色摸两张牌。觉醒后此技失效。'},
           {key:'juexing',name:'觉醒',type:'active',desc:'出牌阶段限一次。体力不大于 2 时可发动：你进入「觉醒形态」，更换形象与语音，体力上限+1 并回复 2 点体力，永久解锁【自强】与【梭哈】；此后你的【杀】伤害+1，且【舔狗】【封心】失效。'},
@@ -1345,11 +1347,13 @@ const FX={
 function takeDeck(n){
   const out=[];
   for(let i=0;i<n;i++){
-    if(G.deck.length===0){
-      if(G.discardPile.length===0) break;
+    /* 提前洗：当「剩余待抽张数 > 牌堆余量」且弃牌堆还有牌时，主动把弃牌堆洗回牌堆，
+       避免「无中生有」等摸牌时牌池见底、弃牌堆也快空，导致反复重洗 / 卡死。 */
+    if(G.deck.length < (n-out.length) && G.discardPile.length>0){
       G.deck=shuffle(G.discardPile); G.discardPile=[];
       log('牌堆已重洗',true);
     }
+    if(G.deck.length===0) break;   /* 牌堆与弃牌堆都空了：能摸几张摸几张，绝不死循环 */
     out.push(G.deck.pop());
   }
   UI.renderPiles();return out;
@@ -1501,6 +1505,17 @@ async function gameLoop(){
 async function roundStart(){
   G.round=(G.round||0)+1;
   if(G.round>1)log(`—— 第 ${G.round} 轮 ——`,true);
+  /* 社恐（张峥）：游戏开始时一次性发放「i人标记」（X 为开局存活角色数，X÷2 向下取整，至多 3 个） */
+  if(G.round===1){
+    const X=G.players.filter(r=>r.alive).length;
+    for(const q of G.players){
+      if(q.alive&&hasSkill(q,'shekong')&&!q.shekongLost){
+        const n=Math.min(3,Math.floor(X/2));
+        q.ipr=n;
+        log(`${nameHTML(q)}【社恐】开局获得 ${n} 个「i人标记」`,true);
+      }
+    }
+  }
   for(const p of G.players){
     if(!p.alive||!hasSkill(p,'gy'))continue;
     /* 游戏开始时获得 3 个麦克风（第一轮初始化） */
@@ -1586,28 +1601,33 @@ function nextSeat(s){const n=G.players.length;for(let i=1;i<=n;i++){const q=P((s
 function seatOrderFrom(s){const n=G.players.length,arr=[];for(let i=0;i<n;i++){const q=P((s+i)%n);if(q.alive)arr.push(q);}return arr;}
 
 async function runTurn(p){
-  p.usedSha=0;p.drank=false;p.skipDraw=false;p.skipPlay=false;p.skillUsed={};p.skillCount={};
+  p.usedSha=0;p.drank=false;p.skipDraw=false;p.skipPlay=false;p.skipJudge=false;p.skipDiscard=false;p.skillUsed={};p.skillCount={};
   if(p.cdDyzt>0)p.cdDyzt--; /* 定燕子朝天：每2回合限一次 */
-  /* 二次元形态（张峥）：持续到自己的下个回合开始时结束 */
-  if(p.nijigen){
-    p.nijigen=false;
-    log(`${nameHTML(p)} 的「二次元形态」结束，形象与语音恢复常态`,true);
-    UI.render();await sleep(350);
-  }
+  /* 二次元（张峥）：社恐临时失效「直到下个回合开始」——此处回合开始即恢复 */
+  p.shekongFail=false;
   UI.render();
   log(`—— ${nameHTML(p)} 的回合 ——`,true);
   floatWord(generalOf(p).name+' 的回合','info');
   SFX.turn(p.gid);   /* 播报：到XX出牌了 */
   await sleep(500);
+  /* 准备阶段：张峥可发动限定技「十连」（跳过本回合判定与摸牌，展示牌堆顶十张） */
+  if(p.alive&&hasSkill(p,'shilian')&&!p.shilianUsed){
+    let go=false;
+    if(p.isAI)go=aiWantShilian(p);
+    else if(p.remote)go=await NET.askRemote(p,'yesNo',['发动【十连】？','准备阶段：跳过本回合判定与摸牌，展示牌堆顶10张……']);
+    else go=await UI.yesNo('发动【十连】？','准备阶段：跳过本回合的判定阶段与摸牌阶段，展示牌堆顶10张牌。');
+    if(go)await doShilian(p);
+  }
   /* 回合开始：观星 */
   if(hasSkill(p,'guanxing'))await Skills.guanxing(p);
   if(G.over)return;
   /* 判定阶段 */
-  await judgePhase(p);
+  if(p.skipJudge){p.skipJudge=false;log(`${nameHTML(p)}【十连】跳过判定阶段`);floatWord('十连·跳判定','info');}
+  else await judgePhase(p);
   if(!p.alive||G.over)return;
   /* 摸牌阶段 */
-  if(p.skipDraw){log(`${nameHTML(p)} 受兵粮寸断影响，跳过摸牌阶段`);floatWord('兵粮寸断','hit');}
-  else{let n=2;await drawCards(p,n);}
+  if(p.skipDraw){log(`${nameHTML(p)} 受兵粮寸断/十连影响，跳过摸牌阶段`);floatWord('兵粮寸断','hit');}
+  else await drawCards(p,2);
   UI.render();await sleep(450);
   /* 出牌阶段 */
   if(p.skipPlay){log(`${nameHTML(p)} 受乐不思蜀影响，跳过出牌阶段`);floatWord('乐不思蜀','hit');}
@@ -1619,6 +1639,8 @@ async function runTurn(p){
   if(p.alive&&hasSkill(p,'gy'))settleDanceMic(p);
   /* 弃牌阶段 */
   await discardPhase(p);
+  /* 结束阶段：张峥·二次元（社恐失效判定 + 移去 i人标记视为用牌） */
+  if(p.alive&&hasSkill(p,'erciyuan'))await doErciyuanEnd(p);
   /* 回合结束 */
   if(p.alive)log(`${nameHTML(p)} 回合结束`);
   UI.render();
@@ -1683,8 +1705,9 @@ function randomDiscard(p,need){
   return drop;
 }
 async function discardPhase(p){
-  /* 社恐（张峥）：手牌上限 +2 */
-  const limit=Math.max(0,p.hp+(hasSkill(p,'shekong')?2:0));
+  if(p.skipDiscard){p.skipDiscard=false;return;}
+  /* 注：新「社恐」不含手牌上限 +2，故手牌上限即等于体力 */
+  const limit=Math.max(0,p.hp);
   if(p.hand.length<=limit){return;}
   const need=p.hand.length-limit;
   if(p.isAI){
@@ -1838,6 +1861,13 @@ function finishPlayPhase(){
 /* ==================== 响应询问系统 ==================== */
 /* 统一入口：need=杀/闪/桃/无懈；返回 {card, virtualName?, via?} 或 null */
 async function askResponse(p,ctx){
+  /* 社恐（张峥）：持有「i人标记」时不能响应其他角色的牌/技能；
+     被要求响应时移去 1 个「i人标记」（视为无法响应）。AI 张峥同样适用，故放在 AI 分支之前。 */
+  if(shekongActive(p)&&iprOf(p)>0&&ctx&&ctx.source&&ctx.source!==p){
+    delIpr(p,1);
+    log(`${nameHTML(p)}【社恐】持有「i人标记」，无法响应，移去 1 个「i人标记」`,true);
+    return null;
+  }
   if(p.isAI)return await AI.respond(p,ctx);
   if(p.remote){
     /* 房主端等待远程玩家响应：一样读秒。
@@ -1922,6 +1952,8 @@ function canPlay(p,card,virtualName){
   if(name==='杀'){
     /* 禁桃：桃视为杀，且不计入使用次数 —— 不受 usedSha 限制，打出后也不累加 usedSha */
     const jtTao=card.name==='桃'&&hasSkill(p,'jt');
+    /* 社恐（张峥）：持有「i人标记」时不能使用【杀】 */
+    if(shekongActive(p)&&iprOf(p)>0)return{ok:false,reason:'社恐：持有「i人标记」时不能使用【杀】'};
     if(!jtTao&&p.usedSha>=1&&!(hasSkill(p,'paoxiao')||(p.equips.weapon&&p.equips.weapon.name==='诸葛连弩')||(hasSkill(p,'jdqs')&&(p.skillCount.jdqs||0)>0)||p.nijigen))
       return{ok:false,reason:'本回合已出过杀（装备诸葛连弩或张飞咆哮可不限次数）'};
     if(validShaTargets(p).length===0)return{ok:false,reason:'攻击范围内没有可使用杀的目标'};
@@ -1931,6 +1963,10 @@ function canPlay(p,card,virtualName){
     if(hasSkill(p,'jt'))return{ok:false,reason:'禁桃：你的【桃】均视为【杀】，点击将作为杀使用'};
     if(p.hp>=p.maxHp)return{ok:false,reason:'体力已满，无需使用桃'};
     return{ok:true};
+  }
+  /* 社恐（张峥）：红桃基本牌（杀/闪）可以当【桃】使用 */
+  if(hasSkill(p,'shekong')&&card.suit==='♥'&&(card.name==='杀'||card.name==='闪')&&p.hp<p.maxHp){
+    return{ok:true,useAs:'tao'};
   }
   if(name==='酒'){
     if(p.drank)return{ok:false,reason:'本回合已使用过酒'};
@@ -1953,8 +1989,8 @@ function canPlay(p,card,virtualName){
     return{ok:true,needTarget:true,targets:t};
   }
   if(name==='决斗'){
-    const t=othersAlive(p).filter(q=>!(hasSkill(q,'kongcheng')&&q.hand.length===0)&&!hasSkill(q,'shekong'));
-    if(!t.length)return{ok:false,reason:'没有可决斗的目标（社恐不能成为决斗目标）'};
+    const t=othersAlive(p).filter(q=>!(hasSkill(q,'kongcheng')&&q.hand.length===0));
+    if(!t.length)return{ok:false,reason:'没有可决斗的目标'};
     return{ok:true,needTarget:true,targets:t};
   }
   if(name==='乐不思蜀'){
@@ -1995,6 +2031,13 @@ async function playFromHand(p,card,virtualName,target){
   else if(name==='杀'&&hasSkill(p,'paoxiao'))SFX.skill('paoxiao');
   else SFX.card(name,card,p);
   try{
+    /* 社恐（张峥）：红桃基本牌（杀/闪）可以当【桃】使用 */
+    if(hasSkill(p,'shekong')&&!virtualName&&card.suit==='♥'&&(card.name==='杀'||card.name==='闪')&&p.hp<p.maxHp){
+      const i=p.hand.findIndex(c=>c.uid===card.uid);if(i>=0)p.hand.splice(i,1);
+      toDiscard(card);p.hp=Math.min(p.maxHp,p.hp+1);
+      log(`${nameHTML(p)} 发动【社恐】：红桃基本牌当【桃】使用，回复 1 点体力`);floatWord('+1','heal');
+      UI.render();G.busy=false;return;
+    }
     if(name==='杀'){
       const real=virtualName?makeVirtual(card,virtualName):card;
       await shaFlow(p,target,real);
@@ -2006,10 +2049,10 @@ async function playFromHand(p,card,virtualName,target){
       equipCard(p,card);floatWord(card.name,'info');
     }
     else if(name==='无中生有'){
-      toDiscard(card);
-      if(await resolveWuxie(p,p,card)){UI.render();G.busy=false;return;}
+      if(await resolveWuxie(p,p,card)){toDiscard(card);UI.render();G.busy=false;return;}
       log(`${nameHTML(p)} 使用无中生有，摸两张牌`);floatWord('无中生有','info');
       await drawCards(p,2);
+      toDiscard(card);   /* 先摸牌再把「无中生有」本身进弃牌堆：避免刚弃的牌被立刻洗回、又抽回来反复 */
     }
     else if(name==='南蛮入侵'||name==='万箭齐发'){
       await aoeFlow(p,card);
@@ -2064,6 +2107,10 @@ async function shaFlow(user,target,card){
   }
   const ignoreArmor=user.equips.weapon&&user.equips.weapon.name==='青釭剑';
   const ans=await askShan(target,user,ignoreArmor);
+  /* 社恐（张峥）：你使用的、需要其他角色响应的牌，若其响应则移去 1 个 i人标记，未响应则获得 1 个 */
+  if(shekongActive(user)&&iprOf(user)>0){
+    if(ans)delIpr(user,1);else addIpr(user,1);
+  }
   if(ans){playResponse(target,ans);log(`${nameHTML(target)} 打出【闪】，闪避成功`);floatWord('閃','heal');UI.render();return;}
   if(user.equips.weapon&&user.equips.weapon.name==='寒冰剑'){
     const useIce=user.isAI?regionCards(target).length>=2:(user.remote?await NET.askRemote(user,'yesNo',['发动寒冰剑？','【杀】命中！可防止伤害，改为弃置目标两张牌。']):await UI.yesNo('发动寒冰剑？','【杀】命中！可防止伤害，改为弃置目标两张牌。'));
@@ -2087,6 +2134,10 @@ async function duelFlow(caster,target,card){
   let cur=target,other=caster,guard=0;
   while(guard++<30){
     const ans=await askResponse(cur,{need:'杀',reason:'duel',source:other,trick:card});
+    /* 社恐（张峥）：你使用的、需要其他角色响应的牌，若其响应则移去 1 个 i人标记，未响应则获得 1 个 */
+    if(shekongActive(other)&&iprOf(other)>0){
+      if(ans)delIpr(other,1);else addIpr(other,1);
+    }
     if(!ans){
       log(`${nameHTML(cur)} 无法出杀，决斗落败`,true);
       await dealDamage(other,cur,1,entity,'决斗');return;
@@ -2108,6 +2159,10 @@ async function aoeFlow(caster,card){
     let ans;
     if(need==='杀')ans=await askResponse(t,{need:'杀',reason:'nanman',source:caster,trick:card});
     else ans=await askShan(t,caster,false);
+    /* 社恐（张峥）：你使用的、需要其他角色响应的牌，若其响应则移去 1 个 i人标记，未响应则获得 1 个 */
+    if(shekongActive(caster)&&iprOf(caster)>0){
+      if(ans)delIpr(caster,1);else addIpr(caster,1);
+    }
     if(ans){playResponse(t,ans);log(`${nameHTML(t)} 打出【${need}】响应`);}
     else{
       log(`${nameHTML(t)} 未能打出【${need}】，受到1点伤害`,true);
@@ -2447,70 +2502,141 @@ function giveHandCard(from,to,card){
   return c;
 }
 
+/* ==================== 张峥（群）· i人标记 辅助 ==================== */
+function iprOf(p){return p.ipr||0;}
+function addIpr(p,n){p.ipr=Math.max(0,(p.ipr||0)+n);UI.render();}
+function delIpr(p,n){p.ipr=Math.max(0,(p.ipr||0)-n);UI.render();}
+/* 社恐是否生效：永久失去（十连遇宝物）或二次元临时失效（翻面/标记>3）时为 false */
+function shekongActive(p){return hasSkill(p,'shekong')&&!p.shekongLost&&!p.shekongFail;}
+
 /* ==================== 张峥（群） ==================== */
-/* 低气压：令一名其他角色弃 2 张手牌；不足 2 张则改为受 1 点伤害 */
-async function doDiqiya(p,t){
-  if(customLeft(p,'diqiya')<=0)return false;
-  if(!t||!t.alive||t===p)return false;
+/* 低气压：出牌阶段限一次。弃置一张手牌，按类型结算 i人标记 */
+async function doDiqiya(p){
+  if(customLeft(p,'diqiya')<=0){toast('【低气压】本回合已使用');return false;}
+  let picked;
+  if(p.isAI)picked=AI.chooseDiscard(p,1);
+  else if(p.remote)picked=await NET.askRemote(p,'pickCards',['【低气压】选择要弃置的一张手牌',p.hand,{min:1,max:1,confirmText:'弃置',force:true}]);
+  else picked=await UI.pickCards('【低气压】选择要弃置的一张手牌',p.hand,{min:1,max:1,confirmText:'弃置',force:true});
+  if(!picked||!picked.length)return false;
+  const card=picked[0];
+  const i=p.hand.findIndex(c=>c.uid===card.uid);if(i<0)return false;
+  p.hand.splice(i,1);
   p.skillCount.diqiya=1;
   SFX.skill('diqiya');
-  log(`${nameHTML(p)} 发动【低气压】，全场气压骤降，${nameHTML(t)} 喘不过气！`,true);
+  log(`${nameHTML(p)} 发动【低气压】，弃置 ${cardHTML(card)}`,true);
   floatWord('低气压','hit');UI.render();await sleep(500);
-  if(t.hand.length>=2){
-    const drop=randomDiscard(t,2);
-    for(const c of drop)toDiscard(c);
-    log(`${nameHTML(t)} 弃置了 2 张手牌`);
-    UI.render();await sleep(450);
-  }else{
-    log(`${nameHTML(t)} 手牌不足 2 张，改为受到 1 点伤害`,true);
-    UI.render();await sleep(300);
-    await dealDamage(p,t,1,null,'低气压');
+  const isBasicOther=(card.type==='basic'&&card.name!=='杀');
+  if(card.name==='杀'){
+    addIpr(p,2);
+    log(`${nameHTML(p)} 弃置【杀】：获得 2 个「i人标记」（现有 ${iprOf(p)}）`,true);
+    floatWord('i人+2','info');
+  }else if(isBasicOther){
+    delIpr(p,1);
+    await drawCards(p,1,'低气压');
+    log(`${nameHTML(p)} 弃置基本牌：移去 1 个「i人标记」并摸一张牌（现有 ${iprOf(p)}）`,true);
+    floatWord('i人-1','info');
+  }else if(card.type==='equip'){
+    equipCard(p,card);addIpr(p,1);
+    log(`${nameHTML(p)} 使用 ${cardHTML(card)} 并获得 1 个「i人标记」（现有 ${iprOf(p)}）`,true);
+    floatWord('i人+1','info');
+  }else{ /* 锦囊牌 */
+    toDiscard(card);delIpr(p,1);p.skipDiscard=true;
+    log(`${nameHTML(p)} 弃置锦囊牌：移去 1 个「i人标记」并跳过本回合弃牌阶段（现有 ${iprOf(p)}）`,true);
+    floatWord('i人-1','info');
   }
-  return true;
-}
-/* 二次元：进入二次元形态（换形象/语音），回 1 血 + 摸 2 张，出杀无次数限制，到自己下个回合开始时结束 */
-async function doErciyuan(p){
-  if(customLeft(p,'erciyuan')<=0)return false;
-  if((p.ecyGame||0)>=2)return false;   /* 每局限两次 */
-  p.skillCount.erciyuan=1;
-  p.ecyGame=(p.ecyGame||0)+1;
-  p.nijigen=true;
-  SFX.skill('erciyuan');
-  log(`${nameHTML(p)} 发动【二次元】，进入二次元形态！✨（本局第 ${p.ecyGame} 次）`,true);
-  floatWord('二次元','heal');UI.render();await sleep(550);
-  if(p.hp<p.maxHp){
-    p.hp=Math.min(p.maxHp,p.hp+1);
-    log(`${nameHTML(p)} 回复 1 点体力（当前 ${p.hp}/${p.maxHp}）`);
-    floatWord('+1','heal');UI.render();await sleep(400);
-  }
-  await drawCards(p,2,'二次元');
   UI.render();
   return true;
 }
-/* 十连：弃所有手牌 → 摸 10 张 → 每 3 张杀造成 1 点伤害（至多 2 点） */
+/* 二次元（锁定技，结束阶段）：翻面/i人>3 则社恐失效至下回合开始；随后可移去 i人标记，每移去1个视为使用1张基本牌/非延时锦囊（杀≤2，锦囊≤1） */
+async function doErciyuanEnd(p){
+  if(!hasSkill(p,'erciyuan')||!p.alive)return;
+  if(p.flipped||iprOf(p)>3){
+    p.shekongFail=true;
+    log(`${nameHTML(p)}【二次元】处于翻面或「i人标记」>3，【社恐】失效直到下个回合开始`,true);
+    floatWord('二次元','info');UI.render();await sleep(450);
+  }
+  let saUsed=0,trickUsed=0;
+  while(iprOf(p)>0&&(saUsed<2||trickUsed<1)&&!G.over&&p.alive){
+    const canSha=saUsed<2&&validShaTargets(p).length>0;
+    const canTrick=trickUsed<1;
+    if(!canSha&&!canTrick)break;
+    let choice;
+    if(p.isAI)choice=aiErciyuanChoice(p,canSha,canTrick);
+    else if(p.remote)choice=await NET.askRemote(p,'chooseAction',['【二次元】移去1个i人标记，视为使用一张牌',erciyuanActs(p,canSha,canTrick)]);
+    else choice=await UI.chooseAction('【二次元】移去1个i人标记，视为使用一张牌',erciyuanActs(p,canSha,canTrick));
+    if(!choice||choice==='stop')break;
+    delIpr(p,1);
+    if(choice==='sha'){
+      const t=await pickTargetForSha(p);
+      if(!t){addIpr(p,1);break;}   /* 没选到目标：退回刚扣的标记 */
+      saUsed++;
+      try{await shaFlow(p,t,{uid:nid(),name:'杀',suit:'♠',rank:1,type:'basic',virtual:true});}catch(e){}
+    }else if(choice==='trick'){
+      trickUsed++;
+      try{await aoeFlow(p,{uid:nid(),name:'南蛮入侵',type:'trick',kind:'instant',virtual:true});}catch(e){}
+    }
+    UI.render();await sleep(400);
+  }
+}
+function erciyuanActs(p,canSha,canTrick){
+  const a=[{v:'sha',t:'视为使用【杀】',disabled:!canSha},{v:'trick',t:'视为使用非延时锦囊（南蛮入侵）',disabled:!canTrick},{v:'stop',t:'停止'}];
+  return a;
+}
+function aiErciyuanChoice(p,canSha,canTrick){
+  if(canSha&&validShaTargets(p).length)return 'sha';
+  if(canTrick)return 'trick';
+  return 'stop';
+}
+async function pickTargetForSha(p){
+  const list=validShaTargets(p);
+  if(!list.length)return null;
+  if(p.isAI)return list[rnd(list.length)];
+  if(p.remote)return await NET.askRemote(p,'pickSeat',['【二次元】选择【杀】的目标',list]);
+  return await pickSeatFor(p,'【二次元】选择【杀】的目标',list);
+}
+/* 十连（限定技，准备阶段）：跳过本回合判定+摸牌，展示牌堆顶10张，获非杀，分配杀，弃未接收杀得标记；含宝物则永久失社恐 */
 async function doShilian(p){
-  if(customLeft(p,'shilian')<=0)return false;
-  p.skillCount.shilian=1;
-  const n=p.hand.length;
-  for(const c of [...p.hand])toDiscard(c);
+  if(p.shilianUsed){toast('【十连】已用过（限定技）');return false;}
+  p.shilianUsed=true;p.skillCount.shilian=1;
+  p.skipJudge=true;p.skipDraw=true;   /* 跳过本回合判定阶段与摸牌阶段 */
   SFX.skill('shilian');
-  log(`${nameHTML(p)} 发动【十连】，弃置全部 ${n} 张手牌，开始十连抽卡！`,true);
+  log(`${nameHTML(p)} 发动【十连】（限定技）：跳过本回合判定与摸牌阶段，展示牌堆顶十张！`,true);
   floatWord('十连！','info');UI.render();await sleep(550);
-  await drawCards(p,10,'十连');
-  const sha=p.hand.filter(c=>c.name==='杀').length;
-  const hits=Math.min(2,Math.floor(sha/3));
-  log(`十连结果：${sha} 张【杀】，触发 ${hits} 次打击`,true);
-  UI.render();await sleep(450);
-  for(let i=0;i<hits;i++){
-    const list=othersAlive(p);if(!list.length||G.over)break;
-    let t;
-    if(p.isAI)t=list[rnd(list.length)];
-    else t=await pickSeatFor(p,`【十连】出货打击 ${i+1}/${hits}：选择受到 1 点伤害的角色`,list);
-    if(!t)break;
-    await dealDamage(p,t,1,null,'十连');
+  const top=takeDeck(10);
+  log(`【十连】展示牌堆顶十张：${top.map(c=>c.suit+c.name).join('、')||'（空）'}`,true);
+  const nonSha=top.filter(c=>c.name!=='杀');
+  const shaCards=top.filter(c=>c.name==='杀');
+  const hasTreasure=top.some(c=>c.type==='treasure');
+  for(const c of nonSha)p.hand.push(c);   /* 获得所有非杀牌 */
+  UI.render();await sleep(400);
+  const unallocated=[];
+  for(const sc of shaCards){
+    if(G.over)break;
+    let tgt=null;
+    if(p.isAI){const list=othersAlive(p);tgt=list.length?list[rnd(list.length)]:null;}
+    else if(p.remote)tgt=await NET.askRemote(p,'pickSeat',['【十连】将这张【杀】分配给谁？（取消=不分配）',othersAlive(p)]);
+    else tgt=await pickSeatFor(p,'【十连】将这张【杀】分配给谁？',othersAlive(p));
+    if(!tgt){unallocated.push(sc);continue;}
+    let recv;
+    if(tgt.isAI)recv=Math.random()<0.6;
+    else if(tgt.remote)recv=await NET.askRemote(tgt,'yesNo',['【十连】'+generalOf(p).name+' 分配给你一张【杀】，是否接收？','接收则其移去1个「i人标记」，你获得此【杀】']);
+    else recv=await UI.yesNo('【十连】'+generalOf(p).name+' 分配给你一张【杀】，是否接收？','接收则'+generalOf(p).name+' 移去1个「i人标记」，你获得此【杀】');
+    if(recv){delIpr(p,1);tgt.hand.push(sc);log(`${nameHTML(tgt)} 接收了【十连】分配的【杀】，${nameHTML(p)} 移去1个「i人标记」（现有 ${iprOf(p)}）`,true);}
+    else {toDiscard(sc);addIpr(p,1);log(`${nameHTML(tgt)} 未接收，【杀】被弃置，${nameHTML(p)} 获得1个「i人标记」（现有 ${iprOf(p)}）`,true);}
+    UI.render();await sleep(350);
+  }
+  for(const sc of unallocated){toDiscard(sc);addIpr(p,1);}
+  if(unallocated.length)log(`${nameHTML(p)} 弃置 ${unallocated.length} 张未分配的【杀】，获得 ${unallocated.length} 个「i人标记」（现有 ${iprOf(p)}）`,true);
+  if(hasTreasure){
+    p.shekongLost=true;addIpr(p,2);
+    log(`${nameHTML(p)}【十连】展示含宝物牌，永久失去【社恐】，且准备阶段结束获得 2 个「i人标记」`,true);
   }
   UI.render();
   return true;
+}
+function aiWantShilian(p){
+  /* AI 张峥：手牌较少或 i人标记不多时更愿意开十连赌一把 */
+  return iprOf(p)<=1&&p.hand.length<=4;
 }
 
 /* ==================== 张嵘（吴） ==================== */
@@ -2910,19 +3036,11 @@ const AI={
         if(t){await doTiangou(p,t,AI.chooseDiscard(p,1)[0]);acted=true;await sleep(600);continue;}
       }
       /* ---- 张峥 ---- */
-      /* 二次元：血不满或手牌少时开形态 */
-      if(hasSkill(p,'erciyuan')&&customLeft(p,'erciyuan')>0&&(p.ecyGame||0)<2&&!p.nijigen&&(p.hp<p.maxHp||h.length<=2)){
-        await doErciyuan(p);acted=true;await sleep(620);continue;
+      /* 低气压：有手牌时弃一张按类型结算 i人标记 */
+      if(hasSkill(p,'diqiya')&&customLeft(p,'diqiya')>0&&h.length){
+        await doDiqiya(p);acted=true;await sleep(600);continue;
       }
-      /* 低气压：打手牌最多的敌人 */
-      if(hasSkill(p,'diqiya')&&customLeft(p,'diqiya')>0){
-        const t=enemiesOf(p).sort((a,b)=>b.hand.length-a.hand.length)[0];
-        if(t&&(t.hand.length>=2||t.hp<=2)){await doDiqiya(p,t);acted=true;await sleep(600);continue;}
-      }
-      /* 十连：手牌差/少时赌一把 */
-      if(hasSkill(p,'shilian')&&customLeft(p,'shilian')>0&&h.length&&h.length<=3&&!h.some(c=>c.name==='杀'||c.name==='闪')){
-        await doShilian(p);acted=true;await sleep(760);continue;
-      }
+      /* 二次元（结束阶段自动结算）/ 十连（准备阶段自动结算）无需在出牌阶段主动发动 */
       /* 4. 装备 */
       const eq=h.find(c=>c.type==='equip'&&AI.shouldEquip(p,c));
       if(eq){await playFromHand(p,eq);acted=true;await sleep(480);continue;}
@@ -3289,8 +3407,7 @@ const UI={
       if(s.key==='hujia')usable=false; // 护驾在响应弹窗中发动，面板按钮仅作说明入口
       if(CUSTOM_SKILL_LIMIT[s.key]!==undefined&&customLeft(p,s.key)<=0)usable=false;
       if(s.key==='dyzt'&&(p.cdDyzt||0)>0)usable=false;
-      /* 张峥 / 张嵘：次数与前置条件 */
-      if(s.key==='erciyuan'&&(p.ecyGame||0)>=2)usable=false;
+      /* 张嵘：次数与前置条件 */
       if(s.key==='juexing'&&(p.awakened||p.hp>2))usable=false;
       if(s.key==='tiangou'&&p.awakened)usable=false;
       if(s.key==='zian'&&!p.awakened&&p.hp>=p.maxHp)usable=false;
@@ -3520,7 +3637,6 @@ const Game={
        ||key==='diqiya'||key==='erciyuan'||key==='shilian'
        ||key==='tiangou'||key==='juexing'||key==='zian'||key==='ziqiang'||key==='suoha'||key==='huankuan'){
       if(key==='dyzt'){if((me.cdDyzt||0)>0)return toast('【定燕子朝天】冷却中，还需 '+me.cdDyzt+' 回合');}
-      else if(key==='erciyuan'){if((me.ecyGame||0)>=2)return toast('【二次元】每局限两次，已用完');}
       else if(key==='juexing'){
         if(me.awakened)return toast('你已处于觉醒形态');
         if(me.hp>2)return toast('【觉醒】需在体力不大于 2 时才能发动');
@@ -3562,15 +3678,9 @@ const Game={
           await doHjlb(me,t1,t2);
         }
         /* ---- 张峥 ---- */
-        else if(key==='diqiya'){
-          const list=othersAlive(me);
-          if(!list.length){toast('场上没有其他角色');return;}
-          const t=await pickSeatFor(me,'【低气压】选择被压制的角色（其弃 2 张手牌，不足则受 1 点伤害）',list);
-          if(!t)return;
-          await doDiqiya(me,t);
-        }
-        else if(key==='erciyuan'){await doErciyuan(me);}
-        else if(key==='shilian'){await doShilian(me);}
+        /* 低气压：弃置自己一张手牌（无需选目标），按类型结算 i人标记 */
+        else if(key==='diqiya'){ await doDiqiya(me); }
+        /* 二次元（锁定技·结束阶段）/ 十连（限定技·准备阶段）均为自动触发，无手动点击入口 */
         /* ---- 张嵘 ---- */
         else if(key==='juexing'){await doJuexing(me);}
         else if(key==='tiangou'){
@@ -4006,9 +4116,18 @@ const NET={
       /* 读秒专用轻量消息（几十字节）：客机本地插值平滑递减，不触发全量快照重发 */
       case 'timer':
         if(NET.clientMode&&d.s!=null){
-          if(!G.timer||G.timer.seat!==d.s||G.timer.kind!=='sync')
-            G.timer={kind:'sync',seat:d.s,total:d.tot||TURN_SEC,left:d.l,t0:Date.now(),onTimeout:null};
-          else{G.timer.left=d.l;G.timer.total=d.tot||G.timer.total;G.timer.t0=Date.now();}
+          if(!G.timer||G.timer.seat!==d.s||G.timer.kind!=='sync'){
+            /* 新一条读秒：以房主广播的剩余秒数为起点 */
+            G.timer={kind:'sync',seat:d.s,total:d.tot||TURN_SEC,left:d.l,t0:Date.now()-(d.tot||TURN_SEC-d.l)*1000,onTimeout:null};
+          }else{
+            /* 平滑对齐：把房主广播的剩余秒数换算成稳定的结束时刻 t0，
+               而不是每收到一条消息就 t0=now 重来 —— 网络抖动时进度条会回跳/跳动（「卡卡卡卡」）。
+               用结束时刻后，本地进度条连续递减，房主每 0.4s 的校正只会微调、不会跳变。 */
+            const total=d.tot||G.timer.total||TURN_SEC;
+            G.timer.total=total;
+            G.timer.left=d.l;
+            G.timer.t0=Date.now()-(total-d.l)*1000;
+          }
           paintTimerBars();
           if(!G.timerId)runTimer();   /* 只在没有 tick 时启动，避免重复 setInterval */
         }
@@ -4179,7 +4298,7 @@ const NET={
       armTimer('play',p.seat,()=>{
         log(`${nameHTML(p)} 超时未操作，自动跳过出牌阶段`,true);
         finishPlayPhase();
-      });
+      }, p.remote?30:TURN_SEC);   /* 远程玩家给足 30 秒：网络卡顿时不会刚卡一下就被自动跳过 */
       UI.render();
       runTimer();        /* 远程玩家的出牌阶段同样读秒，结束权仍在房主手里 */
     }).then(()=>{G.actor=null;G.selecting=null;});
