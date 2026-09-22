@@ -1,0 +1,15 @@
+# 大体积运行环境（朋友需自行安装 Node.js，见“带回家怎么玩.txt”）
+runtime/
+*.msi
+
+# 日志与临时文件
+*.log
+*.txt.tmp
+_check/
+_disabled_fonts/
+node_modules/
+.DS_Store
+
+# 本地诊断输出
+sg-diag-log.txt
+sgs-server-output.txt
