@@ -487,6 +487,8 @@ button{font-family:var(--serif);cursor:pointer;border:none;outline:none;}
 </head>
 <body>
 <div id="table-bg"></div>
+<!-- 常驻版本角标：任何时候都能一眼看出这个页面跑的是哪版代码（两个窗口必须一致） -->
+<div id="ver-tag" style="position:fixed;left:8px;bottom:6px;z-index:9998;font-size:11px;letter-spacing:1px;color:#e8c877;opacity:.6;pointer-events:none;user-select:none;text-shadow:0 1px 2px #000;"></div>
 <button id="sfx-hint" class="hidden" onclick="SFX.pulse(true);SFX.hideHint();">🔊 点这里开启音效</button>
 
 <!-- ===== 资源加载界面：只等头像（秒级）；音效进游戏后后台预热，不挡人 ===== -->
@@ -498,6 +500,7 @@ button{font-family:var(--serif);cursor:pointer;border:none;outline:none;}
     <div class="boot-info" id="boot-info">准备中…</div>
     <div class="boot-hint">头像就绪后立即进入游戏<br>音效将在进入后后台加载，不影响开局</div>
     <button class="btn ghost small hidden" id="boot-skip" onclick="Loader.skip()">加载太慢？点此直接进入</button>
+    <div id="boot-ver" style="margin-top:14px;font-size:12px;letter-spacing:2px;color:#8a7350;user-select:none;"></div>
   </div>
 </div>
 
@@ -780,7 +783,19 @@ const KINGDOM_CLS={wei:'ln-kingdom-wei',shu:'ln-kingdom-shu',wu:'ln-kingdom-wu',
 /* 版本戳：客机每收到一次房主状态快照都比对，若与房主不一致立刻提示。
    联机最常见的「看不到选将 / 显示错误武将技能（如蔡巍却显示杨浩展麦克风）」几乎都源于
    两端 index.html 版本不一致（一边刷新了、另一边还是旧标签页）。这条提示能让问题一眼可见。 */
-const GAME_VERSION='1.0.4';
+const GAME_VERSION='1.0.5';
+/* 版本号上屏：加载页 + 左下角常驻角标都打上同一串号。
+   排查联机问题时，两个窗口必须显示同样的号；任何一个没号 / 号不一样 = 那一页是旧 JS，
+   按 Ctrl+Shift+R 强刷即可（Chrome 会话恢复会直接用内存里的旧页面，普通刷新不一定生效）。 */
+(function(){
+  var txt='三国杀联机版 v'+GAME_VERSION;
+  function set(id,s){try{var e=document.getElementById(id);if(e)e.textContent=s;}catch(err){}}
+  set('boot-ver',txt);
+  set('ver-tag',txt);
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',function(){set('boot-ver',txt);set('ver-tag',txt);});
+  }
+})();
 
 /* ==================== 武将数据库 ==================== */
 /* skills: 主动技能在出牌阶段由按钮触发；被动/触发技由引擎在对应时机调用 */
@@ -4079,7 +4094,7 @@ const NET={
     if(location.protocol==='file:'){toast('联机需要先启动服务器：双击运行 server.js（需安装 Node.js），再用浏览器打开它显示的网址');return;}
     const saved=localStorage.getItem('sgs_name')||'';
     openModal(`<h3>联机对局 · 五人身份局</h3>
-      <div class="m-desc">你创建房间当房主（房主电脑运行游戏引擎），朋友输入房间号加入。<br>不足 5 人的空位由 AI 自动补满。</div>
+      <div class="m-desc">你创建房间当房主（房主电脑运行游戏引擎），朋友输入房间号加入。<br>不足 5 人的空位由 AI 自动补满。<span style="color:#8a7350;">（版本 v${GAME_VERSION}：看不到这个号=页面是旧的，请 Ctrl+Shift+R 强刷）</span></div>
       <div style="display:flex;flex-direction:column;gap:10px;max-width:320px;margin:0 auto;">
         <input id="net-name" maxlength="12" placeholder="你的昵称" value="${saved}" style="padding:10px;border-radius:6px;border:1px solid var(--gold-deep);background:#1d1108;color:var(--gold-bright);font-size:15px;font-family:var(--serif);">
         <input id="net-code" maxlength="4" placeholder="房间号（加入时填写）" style="padding:10px;border-radius:6px;border:1px solid var(--gold-deep);background:#1d1108;color:var(--gold-bright);font-size:15px;font-family:var(--serif);">
