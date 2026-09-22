@@ -783,7 +783,7 @@ const KINGDOM_CLS={wei:'ln-kingdom-wei',shu:'ln-kingdom-shu',wu:'ln-kingdom-wu',
 /* 版本戳：客机每收到一次房主状态快照都比对，若与房主不一致立刻提示。
    联机最常见的「看不到选将 / 显示错误武将技能（如蔡巍却显示杨浩展麦克风）」几乎都源于
    两端 index.html 版本不一致（一边刷新了、另一边还是旧标签页）。这条提示能让问题一眼可见。 */
-const GAME_VERSION='1.0.6';
+const GAME_VERSION='1.0.7';
 /* 版本号上屏：加载页 + 左下角常驻角标都打上同一串号。
    排查联机问题时，两个窗口必须显示同样的号；任何一个没号 / 号不一样 = 那一页是旧 JS，
    按 Ctrl+Shift+R 强刷即可（Chrome 会话恢复会直接用内存里的旧页面，普通刷新不一定生效）。 */
@@ -4094,7 +4094,28 @@ const NET={
       ws.onclose=()=>NET.onClose();
     });
   },
-  send(o){if(NET.ws&&NET.ws.readyState===1)NET.ws.send(JSON.stringify(o));},
+  send(o){
+    if(!(NET.ws&&NET.ws.readyState===1))return;
+    /* 【分片传输】cpolar 免费隧道会「静默丢弃」超过约 4KB 的 WebSocket 消息
+       （实测：4000B ✓ 通过，5000B ✗ 无声无息地丢，双向皆然，readyState 依旧正常）。
+       选将请求（16 将完整数据约 8KB）、中后期状态快照（十几 KB）全都会被吞 ——
+       这就是「等待横幅在跳但弹窗永不出现」「打着打着人死了对面看不到」的真正原因。
+       做法：把大消息切成 ≤900 字符（≤2.7KB UTF-8）的小片逐条发送，
+       接收端 onGameMsg 按 id 重组，对上层完全透明；单片丢了靠 ask 重发机制 2 秒后整体重来。 */
+    try{
+      if(o&&o.t==='msg'&&o.data&&typeof o.data==='object'&&o.data.t!=='chk'){
+        const s=JSON.stringify(o.data);
+        if(NET.byteLen(s)>2500){
+          const CS=900,n=Math.ceil(s.length/CS),id=++NET._chkSeq;
+          for(let i=0;i<n;i++)NET.ws.send(JSON.stringify({t:'msg',to:o.to,data:{t:'chk',id,n,i,d:s.substr(i*CS,CS)}}));
+          return;
+        }
+      }
+    }catch(e){}
+    NET.ws.send(JSON.stringify(o));
+  },
+  /* UTF-8 字节数（cpolar 的 4KB 限制按字节算，中文一个字 3 字节，不能只看字符数） */
+  byteLen(s){let b=0;for(let i=0;i<s.length;i++){const c=s.codePointAt(i);b+=c<0x80?1:(c<0x800?2:(c<0x10000?3:4));if(c>0xffff)i++;}return b;},
   sendTo(seat,data){NET.send({t:'msg',to:seat,data});},
   broadcast(data){for(const r of NET.remotes)NET.sendTo(r.seat,data);},
   /* 应用层心跳：cpolar 免费隧道会把 WebSocket 搞成「TCP 半开」——
@@ -4232,6 +4253,18 @@ const NET={
   },
   onGameMsg(from,d){
     if(!d)return;
+    /* 【分片重组】把 send() 切出来的 {t:'chk'} 碎片拼回完整消息后重新进入本函数。
+       同一条 WebSocket 有序可靠，单片丢失的情况只出现在隧道抽风时 ——
+       那种情况这批碎片永远凑不齐，30 秒后清理；ask 类消息由房主 2 秒重发兜底。 */
+    if(d.t==='chk'){
+      const st=NET._chunks=NET._chunks||{};
+      let c=st[d.id];
+      if(!c)c=st[d.id]={n:d.n,parts:new Array(d.n),got:0,ts:Date.now()};
+      if(c.parts[d.i]==null){c.parts[d.i]=d.d;c.got++;}
+      if(c.got>=c.n){delete st[d.id];try{return NET.onGameMsg(from,JSON.parse(c.parts.join('')));}catch(e){return;}}
+      for(const k in st){if(Date.now()-st[k].ts>30000)delete st[k];}
+      return;
+    }
     if(NET.hostActive){ // 房主收客户端消息
       if(d.k==='act')NET.onRemoteAct(from,d);
       else if(d.k==='answer')NET.onAnswer(from,d);
