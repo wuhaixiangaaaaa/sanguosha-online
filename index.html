@@ -783,7 +783,7 @@ const KINGDOM_CLS={wei:'ln-kingdom-wei',shu:'ln-kingdom-shu',wu:'ln-kingdom-wu',
 /* 版本戳：客机每收到一次房主状态快照都比对，若与房主不一致立刻提示。
    联机最常见的「看不到选将 / 显示错误武将技能（如蔡巍却显示杨浩展麦克风）」几乎都源于
    两端 index.html 版本不一致（一边刷新了、另一边还是旧标签页）。这条提示能让问题一眼可见。 */
-const GAME_VERSION='1.0.5';
+const GAME_VERSION='1.0.6';
 /* 版本号上屏：加载页 + 左下角常驻角标都打上同一串号。
    排查联机问题时，两个窗口必须显示同样的号；任何一个没号 / 号不一样 = 那一页是旧 JS，
    按 Ctrl+Shift+R 强刷即可（Chrome 会话恢复会直接用内存里的旧页面，普通刷新不一定生效）。 */
@@ -4285,6 +4285,14 @@ const NET={
   /* ---------- 客户端：收到房主的交互请求 ---------- */
   onAsk(d){
     const fn=d.fn;
+    /* 【可靠送达配套】房主现在每 2 秒重发同一条 ask（防隧道黑洞吞首包）：
+       1) 这单已经答过 → 直接把备忘录里的答案再发一遍（answer 丢了也能自愈）；
+       2) 同 askId 的重复 ask → 忽略，绝不重开弹窗、绝不重复作答。 */
+    if(NET._ansMemo&&NET._ansMemo[d.askId]!=null){
+      try{NET.sendTo(0,{k:'answer',askId:d.askId,v:NET._ansMemo[d.askId]});}catch(e){}
+      return;
+    }
+    if(NET.currentAsk&&NET.currentAsk.askId===d.askId)return;
     NET.currentAsk={askId:d.askId,fn};
     if(fn==='chooseGeneral'){
       /* 防御：房主发来的武将选项本身就是完整数据（name/kingdom/hp/skills 都已带好）。
@@ -4310,6 +4318,14 @@ const NET={
     UI[fn](...args);
   },
   sendAnswer(ask,v){
+    /* 备忘录：记住这个 askId 已答的内容（序列化后的）。房主若因 answer 丢包而重发 ask，
+       onAsk 会用它秒回，玩家不用再点一次。上限 50 条防膨胀。 */
+    try{
+      NET._ansMemo=NET._ansMemo||{};
+      NET._ansMemo[ask.askId]=NET.serAns(ask.fn,v);
+      const ks=Object.keys(NET._ansMemo);
+      if(ks.length>50)delete NET._ansMemo[ks[0]];
+    }catch(e){}
     NET.currentAsk=null;
     NET.sendTo(0,{k:'answer',askId:ask.askId,v:NET.serAns(ask.fn,v)});
   },
@@ -4488,9 +4504,10 @@ const NET={
       /* 等待横幅：让全桌看到轮到谁 + 倒计时（被问的人自己看到「轮到你」） */
       const tot=Math.round((ms||NET.ASK_TIMEOUT_MS)/1000);
       let left=tot;
+      let rt=null;   /* ask 重发定时器（下方赋值），done 里要清掉 */
       NET.broadcast({k:'wait',seat:p.seat,name:who,left,tot});
       const wt=setInterval(()=>{left=Math.max(0,left-0.5);if(!settled)NET.broadcast({k:'wait',seat:p.seat,name:who,left,tot});},500);
-      const done=v=>{if(settled)return;settled=true;clearTimeout(to);clearInterval(wt);NET.broadcast({k:'wait',clear:1});res(v);};
+      const done=v=>{if(settled)return;settled=true;clearTimeout(to);clearInterval(wt);if(rt)clearInterval(rt);NET.broadcast({k:'wait',clear:1});res(v);};
       const to=setTimeout(()=>{
         delete NET.pending[askId];
         if(NET.pendingSeat[p.seat]===askId)delete NET.pendingSeat[p.seat];
@@ -4501,6 +4518,15 @@ const NET={
       NET.pending[askId]={res:done,fn,seat:p.seat,extra:se.extra};
       NET.pendingSeat[p.seat]=askId;
       NET.sendTo(p.seat,{k:'ask',askId,fn,a:se.a});
+      /* 【可靠送达】以前 ask 只发一次 —— 在 cpolar 这类隧道上，闲置几十秒后的第一条消息
+         最容易被「半开黑洞」吞掉，表现恰好是：对面的等待横幅正常跳（那是之后每 0.5s 的
+         新消息）、但选将/出牌弹窗永远不出现、到点显示「已超时，视为放弃」。
+         现在每 2 秒重发一次 ask，直到对端作答或本端超时为止。
+         客户端按 askId 去重 + 答案备忘录补发（见 onAsk/sendAnswer），重发无副作用。 */
+      rt=setInterval(()=>{
+        if(settled){clearInterval(rt);return;}
+        try{NET.sendTo(p.seat,{k:'ask',askId,fn,a:se.a});}catch(e){}
+      },2000);
     });
   },
   onAnswer(seat,d){
